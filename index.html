@@ -1,28 +1,353 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Rick | Industrial Automation & Vision Engineer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rick | Industrial Systems & Vision Engineer</title>
     <style>
-        body { font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 40px auto; padding: 0 20px; color: #333; }
-        h1 { color: #0056b3; }
-        .project-card { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #0f1117;
+            --surface: #1a1d24;
+            --border: #2a2e3a;
+            --text: #c8ccd4;
+            --text-dim: #6b7280;
+            --accent: #e8913a;
+            --accent-glow: rgba(232,145,58,0.15);
+            --font-mono: 'SF Mono','Cascadia Code','Consolas',monospace;
+            --font-sans: 'Segoe UI','Inter',system-ui,-apple-system,sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-sans);
+            overflow-x: hidden;
+        }
+
+        /* ── Three.js Canvas ──────────────────── */
+        #bg-canvas {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 0; pointer-events: none;
+        }
+
+        /* ── Content ──────────────────────────── */
+        .content { position: relative; z-index: 1; }
+
+        /* Hero */
+        .hero {
+            min-height: 90vh;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; padding: 40px 20px;
+        }
+        .hero .pretitle {
+            font-family: var(--font-mono);
+            font-size: 0.75rem; letter-spacing: 0.2em;
+            color: var(--accent); text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+        .hero h1 {
+            font-size: clamp(2.8rem, 6vw, 4.5rem);
+            font-weight: 800; color: #fff;
+            line-height: 1.1; margin-bottom: 20px;
+        }
+        .hero h1 span { color: var(--accent); }
+        .hero .tagline {
+            font-size: 1.15rem; color: var(--text-dim);
+            max-width: 560px; line-height: 1.6;
+        }
+        .hero .highlight-bar {
+            display: flex; gap: 24px; margin-top: 32px;
+            flex-wrap: wrap; justify-content: center;
+        }
+        .highlight-bar .item {
+            font-family: var(--font-mono); font-size: 0.78rem;
+            color: var(--text-dim);
+            display: flex; align-items: center; gap: 6px;
+        }
+        .highlight-bar .item .dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--accent);
+        }
+        .scroll-hint {
+            margin-top: 56px;
+            font-family: var(--font-mono); font-size: 0.7rem;
+            color: var(--text-dim); letter-spacing: 0.15em;
+            animation: fadePulse 2s ease-in-out infinite;
+        }
+        @keyframes fadePulse {
+            0%,100% { opacity: 0.3; } 50% { opacity: 1; }
+        }
+
+        /* Projects Section */
+        .projects-section {
+            max-width: 960px; margin: 0 auto; padding: 60px 20px 100px;
+        }
+        .projects-section h2 {
+            font-size: 1.5rem; color: #fff; margin-bottom: 32px;
+            display: flex; align-items: center; gap: 12px;
+        }
+        .projects-section h2::before {
+            content: ''; display: block; width: 24px; height: 2px;
+            background: var(--accent);
+        }
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 20px;
+        }
+        .project-card {
+            background: var(--surface);
+            border: 1px solid var(--border); border-radius: 8px;
+            padding: 28px;
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+            cursor: pointer; text-decoration: none; display: block; color: inherit;
+        }
+        .project-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent);
+            box-shadow: 0 8px 32px var(--accent-glow);
+        }
+        .project-card .card-eyebrow {
+            font-family: var(--font-mono); font-size: 0.68rem;
+            letter-spacing: 0.12em; color: var(--accent);
+            text-transform: uppercase; margin-bottom: 10px;
+        }
+        .project-card h3 {
+            font-size: 1.25rem; color: #fff; margin-bottom: 8px;
+        }
+        .project-card p {
+            font-size: 0.88rem; color: var(--text-dim); line-height: 1.5;
+            margin-bottom: 14px;
+        }
+        .project-card .tags {
+            display: flex; flex-wrap: wrap; gap: 6px;
+        }
+        .project-card .tag {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            padding: 3px 10px; border-radius: 3px;
+            font-family: var(--font-mono); font-size: 0.68rem;
+            color: var(--text-dim);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center; padding: 40px 20px;
+            color: var(--text-dim); font-size: 0.8rem;
+            border-top: 1px solid var(--border);
+        }
+
+        @media (max-width: 500px) {
+            .hero h1 { font-size: 2.2rem; }
+            .project-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
-    <h1>Rick</h1>
-    <p>Experienced Professional in Server Management, Programming, and Industrial Vision Systems.</p>
-    <hr>
-    <h2>Featured Projects</h2>
-    <div class="project-card">
-        <h3>PosRobot</h3>
-        <p>Multi-process industrial control server for Boston Dynamics Spot robots with dual-channel safety architecture and custom binary telegram protocol.</p>
-        <a href="PosRobot/index.html">View Documentation</a>
-    </div>
-    <div class="project-card">
-        <h3>MPC1 - Unity Digital Twin</h3>
-        <p>A digital twin simulation for factory automation and PLC integration.</p>
-        <a href="mpc1/index.html">View Documentation</a>
-    </div>
+
+<canvas id="bg-canvas"></canvas>
+
+<div class="content">
+    <section class="hero">
+        <p class="pretitle">Senior Systems & Vision Engineer</p>
+        <h1>Rick <span>Jun</span></h1>
+        <p class="tagline">
+            Bridging industrial automation and software engineering —
+            PLC programming, machine vision, and robot control systems.
+        </p>
+        <div class="highlight-bar">
+            <span class="item"><span class="dot"></span>10+ Years in Industrial Automation</span>
+            <span class="item"><span class="dot"></span>C# / Python / PLC / Vision</span>
+            <span class="item"><span class="dot"></span>IT + OT Integration</span>
+        </div>
+        <p class="scroll-hint">▼ PROJECTS ▼</p>
+    </section>
+
+    <section class="projects-section" id="projects">
+        <h2>Featured Projects</h2>
+        <div class="project-grid">
+
+            <a class="project-card" href="Projects/PosRobot/index.html">
+                <p class="card-eyebrow">Python · Multiprocessing · Spot SDK</p>
+                <h3>PosRobot</h3>
+                <p>Industrial control server for Boston Dynamics Spot with dual-channel safety architecture, custom binary telegram protocol, and database-driven fleet management.</p>
+                <div class="tags">
+                    <span class="tag">Python</span>
+                    <span class="tag">TCP/IP</span>
+                    <span class="tag">E-Stop</span>
+                    <span class="tag">SQL Server</span>
+                    <span class="tag">OpenCV</span>
+                </div>
+            </a>
+
+            <a class="project-card" href="Projects/mpc1/index.html">
+                <p class="card-eyebrow">Unity · C# · PLC</p>
+                <h3>MPC1 — Digital Twin</h3>
+                <p>Factory automation digital twin with real-time PLC integration and interactive 3D visualization.</p>
+                <div class="tags">
+                    <span class="tag">Unity</span>
+                    <span class="tag">C#</span>
+                    <span class="tag">PLC</span>
+                    <span class="tag">Modbus</span>
+                </div>
+            </a>
+
+        </div>
+    </section>
+
+    <footer>
+        <p>© Rick Jun · Industrial Systems & Vision Engineer</p>
+    </footer>
+</div>
+
+<!-- ── Three.js Scene ───────────────────────────── -->
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+
+const canvas = document.getElementById('bg-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 100);
+camera.position.set(0, 1.5, 8);
+camera.lookAt(0, 0, 0);
+
+// ── Lighting ──
+scene.add(new THREE.AmbientLight(0x2a3040, 1.2));
+const key = new THREE.DirectionalLight(0xe8913a, 2.5);
+key.position.set(4, 3, 2);
+scene.add(key);
+const rim = new THREE.DirectionalLight(0x5b9bd5, 1.5);
+rim.position.set(-3, -1, -2);
+scene.add(rim);
+
+// ── Central Geometry: Wireframe Torus Knot ──
+const knotGeo = new THREE.TorusKnotGeometry(1.4, 0.3, 128, 32);
+const knotMat = new THREE.MeshStandardMaterial({
+    color: 0x1a1d24,
+    metalness: 0.85,
+    roughness: 0.25,
+});
+const knot = new THREE.Mesh(knotGeo, knotMat);
+scene.add(knot);
+
+const wireGeo = new THREE.TorusKnotGeometry(1.42, 0.31, 128, 16);
+const wireMat = new THREE.MeshBasicMaterial({
+    color: 0xe8913a, wireframe: true, transparent: true, opacity: 0.12,
+});
+const wireframe = new THREE.Mesh(wireGeo, wireMat);
+scene.add(wireframe);
+
+// ── Orbiting Particles ──
+const particlesGeo = new THREE.BufferGeometry();
+const count = 500;
+const positions = new Float32Array(count * 3);
+for (let i = 0; i < count; i++) {
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
+    const r = 2.4 + Math.random() * 1.2;
+    positions[i*3]     = r * Math.sin(phi) * Math.cos(theta);
+    positions[i*3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+    positions[i*3 + 2] = r * Math.cos(phi);
+}
+particlesGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+const particlesMat = new THREE.PointsMaterial({
+    color: 0x5b9bd5, size: 0.018, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending,
+});
+const particles = new THREE.Points(particlesGeo, particlesMat);
+scene.add(particles);
+
+// ── Floating Small Orbs ──
+const orbs = [];
+const orbGeo = new THREE.SphereGeometry(0.06, 16, 16);
+for (let i = 0; i < 5; i++) {
+    const mat = new THREE.MeshStandardMaterial({
+        color: i % 2 === 0 ? 0xe8913a : 0x5b9bd5,
+        emissive: i % 2 === 0 ? 0xe8913a : 0x5b9bd5,
+        emissiveIntensity: 0.6,
+        roughness: 0.3,
+    });
+    const orb = new THREE.Mesh(orbGeo, mat);
+    orb.userData = {
+        angle: (i / 5) * Math.PI * 2,
+        radius: 2.2 + Math.random() * 0.6,
+        speed: 0.3 + Math.random() * 0.4,
+        yOff: (Math.random() - 0.5) * 2.5,
+    };
+    scene.add(orb);
+    orbs.push(orb);
+}
+
+// ── Grid Floor ──
+const grid = new THREE.GridHelper(10, 30, 0x2a2e3a, 0x1a1d24);
+grid.position.y = -2.5;
+scene.add(grid);
+
+// ── Mouse Tracking ──
+const mouse = { x: 0, y: 0 };
+window.addEventListener('mousemove', (e) => {
+    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+});
+
+// ── Scroll Tracking ──
+let scrollY = 0;
+window.addEventListener('scroll', () => { scrollY = window.scrollY; });
+
+// ── Animation Loop ──
+const clock = new THREE.Clock();
+function animate() {
+    requestAnimationFrame(animate);
+    const t = clock.getElapsedTime();
+
+    // Rotate main knot
+    knot.rotation.x += 0.002;
+    knot.rotation.y += 0.003;
+    wireframe.rotation.x = knot.rotation.x;
+    wireframe.rotation.y = knot.rotation.y;
+
+    // Particles rotate opposite direction
+    particles.rotation.x -= 0.0008;
+    particles.rotation.y -= 0.0012;
+
+    // Orbiting orbs
+    orbs.forEach(orb => {
+        orb.userData.angle += orb.userData.speed * 0.008;
+        const a = orb.userData.angle;
+        const r = orb.userData.radius;
+        orb.position.x = Math.cos(a) * r;
+        orb.position.z = Math.sin(a) * r;
+        orb.position.y = orb.userData.yOff + Math.sin(t * 0.7 + a) * 0.4;
+    });
+
+    // Parallax: scroll down → camera pulls back slightly
+    const scrollFactor = Math.min(scrollY / 800, 1);
+    camera.position.z = 8 + scrollFactor * 1.5;
+    camera.position.y = 1.5 - scrollFactor * 0.6;
+
+    // Subtle mouse parallax
+    camera.position.x += (mouse.x * 0.8 - camera.position.x) * 0.02;
+    camera.position.y += (-mouse.y * 0.3 + 1.5 - scrollFactor * 0.6 - camera.position.y) * 0.02;
+    camera.lookAt(0, -0.2, 0);
+
+    renderer.render(scene, camera);
+}
+animate();
+
+// ── Resize ──
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+
 </body>
 </html>
