@@ -188,6 +188,13 @@
             border-color: var(--accent);
             box-shadow: 0 8px 32px var(--accent-glow);
         }
+        .project-card .thumb {
+            display: block; width: calc(100% + 52px); margin: -26px -26px 18px;
+            height: 150px; object-fit: cover;
+            border-bottom: 1px solid var(--border);
+            border-radius: 8px 8px 0 0;
+            background: #0a0c10;
+        }
         .project-card .card-eyebrow {
             font-family: var(--font-mono); font-size: 0.66rem;
             letter-spacing: 0.12em; color: var(--accent);
@@ -276,13 +283,13 @@
         <p class="pretitle" data-i18n="pretitle">시스템 & 비전 엔지니어 · 前 SW 회사 대표</p>
         <h1 class="maintitle" data-i18n="maintitle">Rick <span>Jun</span></h1>
         <p class="tagline" data-i18n="tagline">
-            산업용 비전 검사, PLC 자동화, ELK/OpenSearch 모니터링, AI 데이터 처리까지 10년 이상의 현장 경험.
+            산업용 비전 검사, OpenSearch/ELK 모니터링, AI 모델링 및 데이터 처리 그리고 PLC 까지 10년 이상의 현장 경험.
         </p>
         <div class="highlight-bar">
-            <span class="item">Vision Inspection</span>
-            <span class="item">ELK · OpenSearch</span>
-            <span class="item">Python · C# · VBScript</span>
+            <span class="item">OpenSearch · ELK</span>
+            <span class="item">Python · C#</span>
             <span class="item">AI · Data Viz</span>
+            <span class="item">Vision Inspection</span>
         </div>
     </section>
 
@@ -291,11 +298,23 @@
         <div class="project-grid">
 
             <a class="project-card" href="Projects/PosRobot/index.html">
+				<img class="thumb" src="Projects/PosRobot/images/2-spot-dock-industrial.jpg" alt="Spot on dock">
+                
                 <p class="card-eyebrow">Python · Multiprocessing · Spot SDK</p>
                 <h3>PosRobot</h3>
                 <p data-i18n="posrobot-desc">Boston Dynamics Spot 제어를 위한 멀티프로세스 산업용 서버 — 이중 안전채널 아키텍처, 커스텀 바이너리 텔레그램 프로토콜, DB 기반 플릿 관리.</p>
                 <div class="tags">
                     <span class="tag">Python</span><span class="tag">TCP/IP</span><span class="tag">E-Stop</span><span class="tag">SQL Server</span><span class="tag">OpenCV</span>
+                </div>
+            </a>
+
+            <a class="project-card" href="Projects/slab-cooling/index.html">
+                <img class="thumb" src="Projects/slab-cooling/images/screenshot2.png" alt="Slab 냉각폭 예측 AI 대시보드">
+                <p class="card-eyebrow">Python · TensorFlow · Plotly · 2022</p>
+                <h3 data-i18n="slab-title">Slab 냉각폭 예측 AI 모델</h3>
+                <p data-i18n="slab-desc">제강 연주공정의 냉각수량으로부터 1주일 뒤 슬래브 최종 폭을 예측하는 MLP 모델 — 결측 잦은 레이저 측정값을 슬라이딩 윈도우로 보완, 실시간 예측·시각화까지 구축.</p>
+                <div class="tags">
+                    <span class="tag">Python</span><span class="tag">TensorFlow</span><span class="tag">MLP</span><span class="tag">Plotly</span><span class="tag">Steel</span>
                 </div>
             </a>
 
@@ -334,6 +353,8 @@ const i18n = {
         'tagline': '산업용 비전 검사, PLC 자동화, ELK/OpenSearch 모니터링, AI 데이터 처리까지 10년 이상의 현장 경험.',
         'projects-title': '주요 프로젝트',
         'posrobot-desc': 'Boston Dynamics Spot 제어를 위한 멀티프로세스 산업용 서버 — 이중 안전채널 아키텍처, 커스텀 바이너리 텔레그램 프로토콜, DB 기반 플릿 관리.',
+        'slab-title': 'Slab 냉각폭 예측 AI 모델',
+        'slab-desc': '제강 연주공정의 냉각수량으로부터 1주일 뒤 슬래브 최종 폭을 예측하는 MLP 모델 — 결측 잦은 레이저 측정값을 슬라이딩 윈도우로 보완, 실시간 예측·시각화까지 구축.',
         'mpc1-desc': '실시간 PLC 연동이 가능한 공장 자동화 디지털 트윈, 인터랙티브 3D 시각화.',
         'footer': '© 전영욱 · 시스템 아키텍트',
     },
@@ -352,6 +373,8 @@ const i18n = {
         'tagline': '10+ years across industrial vision inspection, PLC automation, monitoring systems on ELK/OpenSearch, and AI-powered data processing.',
         'projects-title': 'Featured Projects',
         'posrobot-desc': 'Industrial control server for Boston Dynamics Spot with dual-channel safety architecture, custom binary telegram protocol, and database-driven fleet management.',
+        'slab-title': 'Slab Final-Width Prediction (AI)',
+        'slab-desc': 'MLP model predicting a continuously cast slab\'s final width a week after casting from cooling-water flow — sliding-window imputation for noisy laser measurements, real-time inference & Plotly dashboard.',
         'mpc1-desc': 'Factory automation digital twin with real-time PLC integration and interactive 3D visualization.',
         'footer': '© Rick Jun · Systems Architect',
     }
