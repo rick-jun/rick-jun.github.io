@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PosRobot — Industrial Robot Control Server | Rick</title>
+
+    <style>
+        /* ── Reset & Base ────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:         #1a1d22;
+            --surface:    #242830;
+            --border:     #363b44;
+            --text:       #c8ccd4;
+            --text-dim:   #7a8190;
+            --accent:     #e8913a;
+            --accent-dim: #b8722e;
+            --green:      #4ec973;
+            --red:        #e0555a;
+            --blue:       #5b9bd5;
+            --font-mono:  'SF Mono', 'Cascadia Code', 'Consolas', 'Monaco', monospace;
+            --font-sans:  'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+            --max-w:      960px;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-sans);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        /* ── Navigation ─────────────────────────────────── */
+        nav {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 20px;
+            position: sticky; top: 0; z-index: 10;
+        }
+        nav .inner {
+            max-width: var(--max-w); margin: 0 auto;
+            display: flex; align-items: center; gap: 24px;
+            height: 52px;
+        }
+        nav a {
+            color: var(--text-dim); text-decoration: none;
+            font-size: 0.9rem; font-weight: 500;
+            transition: color 0.15s;
+        }
+        nav a:hover { color: var(--text); }
+        nav .brand { color: var(--accent); font-weight: 700; font-size: 1rem; margin-right: auto; }
+
+        /* ── Layout ─────────────────────────────────────── */
+        .container { max-width: var(--max-w); margin: 0 auto; padding: 0 20px; }
+
+        header.hero {
+            padding: 64px 0 48px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 48px;
+        }
+        header.hero .eyebrow {
+            color: var(--accent);
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 8px;
+        }
+        header.hero h1 {
+            font-size: 2.4rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            color: #fff;
+        }
+        header.hero .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-dim);
+            max-width: 680px;
+        }
+        header.hero .tags {
+            display: flex; flex-wrap: wrap; gap: 8px;
+            margin-top: 20px;
+        }
+        .tag {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.78rem;
+            font-family: var(--font-mono);
+            color: var(--text-dim);
+        }
+        .tag.highlight { border-color: var(--accent-dim); color: var(--accent); }
+
+        /* ── Sections ───────────────────────────────────── */
+        section {
+            margin-bottom: 56px;
+        }
+        section h2 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 10px;
+        }
+        section h2 .num {
+            color: var(--accent);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            font-weight: 400;
+        }
+        section h3 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #e0e3e8;
+            margin: 24px 0 8px;
+        }
+        section p, section li {
+            color: var(--text-dim);
+            margin-bottom: 10px;
+        }
+        section strong { color: var(--text); }
+
+        /* ── Architecture Diagram ───────────────────────── */
+        .arch-diagram {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 24px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        .arch-diagram pre {
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            line-height: 1.6;
+            color: var(--text);
+            white-space: pre;
+        }
+        .arch-diagram .comment { color: #5c6370; }
+        .arch-diagram .keyword { color: var(--blue); }
+        .arch-diagram .func    { color: var(--green); }
+        .arch-diagram .arrow   { color: var(--accent); }
+        .arch-diagram .process { color: #e5c07b; }
+
+        /* ── Code Blocks ────────────────────────────────── */
+        .code-block {
+            background: #1e2127;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 16px 0;
+        }
+        .code-block .label {
+            background: var(--surface);
+            padding: 6px 14px;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border-bottom: 1px solid var(--border);
+        }
+        .code-block pre {
+            padding: 16px 20px;
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            line-height: 1.7;
+            color: var(--text);
+            overflow-x: auto;
+        }
+
+        /* ── Tables ─────────────────────────────────────── */
+        .table-wrap {
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        th, td {
+            text-align: left;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-dim);
+            background: var(--surface);
+            position: sticky; top: 0;
+        }
+        td { color: var(--text); }
+        td.dim { color: var(--text-dim); font-size: 0.82rem; }
+        td code {
+            background: var(--surface);
+            padding: 2px 6px; border-radius: 3px;
+            font-family: var(--font-mono); font-size: 0.8rem;
+        }
+
+        /* ── Safety Flow ────────────────────────────────── */
+        .safety-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 20px 0;
+        }
+        @media (max-width: 640px) { .safety-grid { grid-template-columns: 1fr; } }
+
+        .safety-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 18px 20px;
+        }
+        .safety-card h4 {
+            color: #fff;
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .safety-card h4 .dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            display: inline-block;
+        }
+        .dot.green { background: var(--green); }
+        .dot.red   { background: var(--red); }
+        .dot.blue  { background: var(--blue); }
+        .dot.amber { background: var(--accent); }
+        .safety-card p { font-size: 0.82rem; margin: 0; }
+
+        /* ── Error Code Taxonomy ────────────────────────── */
+        .error-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin: 16px 0;
+        }
+        .error-card {
+            background: var(--surface);
+            border-left: 3px solid var(--border);
+            border-radius: 0 4px 4px 0;
+            padding: 14px 16px;
+        }
+        .error-card .range {
+            font-family: var(--font-mono);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        .error-card .label {
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            margin-top: 2px;
+        }
+        .error-card.e1 { border-left-color: var(--blue); }
+        .error-card.e2 { border-left-color: #c678dd; }
+        .error-card.e3 { border-left-color: var(--red); }
+        .error-card.e9 { border-left-color: var(--accent); }
+
+        /* ── Two-Column ─────────────────────────────────── */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+
+        /* ── Lesson Box ─────────────────────────────────── */
+        .lesson-box {
+            background: var(--surface);
+            border-left: 3px solid var(--accent);
+            padding: 18px 22px;
+            border-radius: 0 6px 6px 0;
+            margin: 20px 0;
+        }
+        .lesson-box h4 { color: #fff; margin-bottom: 6px; font-size: 0.95rem; }
+        .lesson-box p  { color: var(--text-dim); font-size: 0.85rem; margin: 0; }
+
+        /* ── Footer ─────────────────────────────────────── */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 32px 0;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.82rem;
+        }
+        footer a { color: var(--accent); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+
+        /* ── Byte Visualization ─────────────────────────── */
+        .byte-row {
+            display: flex; gap: 4px; flex-wrap: wrap;
+            margin: 12px 0;
+        }
+        .byte-cell {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 8px 10px;
+            text-align: center;
+            min-width: 52px;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            line-height: 1.3;
+        }
+        .byte-cell .val { color: #fff; font-weight: 700; font-size: 0.85rem; }
+        .byte-cell .lbl { color: var(--text-dim); font-size: 0.68rem; }
+        .byte-cell.magic { border-color: var(--accent-dim); }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="inner">
+        <a href="../../index.html" class="brand">Rick</a>
+        <a href="../../index.html">Home</a>
+        <a href="../../index.html#projects">Projects</a>
+    </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<header class="hero">
+    <div class="container">
+        <p class="eyebrow">Industrial Automation &middot; Python &middot; Boston Dynamics</p>
+        <h1>PosRobot</h1>
+        <p class="subtitle">
+            A production-grade multi-process control server that bridges HMIs to Boston Dynamics Spot robots
+            over a custom binary protocol — with dual-channel safety architecture and database-driven fleet management.
+        </p>
+        <div class="tags">
+            <span class="tag highlight">Python 3.10</span>
+            <span class="tag highlight">Multiprocessing</span>
+            <span class="tag">Boston Dynamics SDK 3.3</span>
+            <span class="tag">SQL Server</span>
+            <span class="tag">Custom Binary Protocol</span>
+            <span class="tag">OpenCV</span>
+            <span class="tag">TCP/IP</span>
+            <span class="tag">E-Stop Safety</span>
+        </div>
+    </div>
+</header>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<main class="container">
+
+    <!-- ── 01. WHY ──────────────────────────────────────── -->
+    <section>
+        <h2><span class="num">01</span> The Problem</h2>
+        <p>
+            Controlling an industrial robot from a remote HMI (Human-Machine Interface) over TCP/IP is not
+            just a networking problem — it's a <strong>safety-critical systems engineering problem</strong>.
+            If the command channel hangs or the controlling process crashes, the robot must stop. Not eventually — immediately.
+        </p>
+        <p>
+            The Python Boston Dynamics Spot SDK runs complex gRPC-based communication internally. Early prototyping
+            revealed that Spot SDK objects <strong>cannot be pickled</strong> — they can't be shared across
+            <code>multiprocessing.Process</code> boundaries using the standard high-level APIs. This meant the
+            initial shared-memory design (Robot instances in a shared dict across processes) would not work with
+            real hardware.
+        </p>
+        <p>
+            <strong>The solution:</strong> Each Spot instance lives in exactly one process. All other processes
+            communicate with it through dedicated TCP sockets and shared-memory flags — not Python object sharing.
+        </p>
+    </section>
+
+    <!-- ── 02. ARCHITECTURE ────────────────────────────── -->
+    <section>
+        <h2><span class="num">02</span> Process Architecture</h2>
+        <p>
+            The system uses a <strong>process-per-connection</strong> model with strict separation of
+            safety (E-Stop) and command channels.
+        </p>
+
+        <div class="arch-diagram">
+<pre>
+<span class="comment"># Process Tree (one robot, one HMI connected)</span>
+
+<span class="keyword">main</span>()
+  │
+  ├── <span class="process">logger_process</span>         <span class="arrow">← Queue-driven</span>      <span class="comment"># writes all logs to disk</span>
+  ├── <span class="process">status_queue_process</span>   <span class="arrow">← Queue-driven</span>      <span class="comment"># writes telemetry to SQL Server</span>
+  │
+  └── <span class="process">tcp_server</span>              <span class="comment"># TCP :50000, accepts HMI connections</span>
+        │
+        └── <span class="process">hmi_connection</span>         <span class="comment"># One process per connected HMI</span>
+              │                  <span class="comment"># Handles login, auth, robot assignment</span>
+              │
+              └── <span class="func">Spot.login()</span>
+                    │
+                    ├── <span class="process">estop()</span>          <span class="comment"># E-Stop channel (dedicated TCP port)</span>
+                    │     <span class="arrow">│</span>  <span class="comment"># Heartbeat watchdog: 3-second timeout</span>
+                    │     <span class="arrow">│</span>  <span class="comment"># Independent process — survives command crash</span>
+                    │     <span class="arrow">│</span>  <span class="comment"># Controls: allow / settle_then_cut / stop / shutdown</span>
+                    │     <span class="arrow">│</span>
+                    │     <span class="arrow">└──►</span> <span class="keyword">if heartbeat lost</span> <span class="arrow">→ settle_then_cut()</span>
+                    │
+                    └── <span class="process">hmi()</span>            <span class="comment"># Command channel (dedicated TCP port)</span>
+                          <span class="arrow">│</span>  <span class="comment"># 16 command types via custom binary protocol</span>
+                          <span class="arrow">│</span>  <span class="comment"># Dispatches to: Motion · Camera · Lights · State</span>
+                          <span class="arrow">│</span>
+                          <span class="arrow">└──►</span> <span class="func">command_control()</span>
+                                 <span class="arrow">├──►</span> MotionHandler  <span class="arrow">→</span> Spot SDK (gRPC)
+                                 <span class="arrow">├──►</span> CameraHandler  <span class="arrow">→</span> Spot CAM (gRPC)
+                                 <span class="arrow">├──►</span> LightHandler   <span class="arrow">→</span> LightingClient
+                                 <span class="arrow">└──►</span> StateHandler   <span class="arrow">→</span> RobotStateClient
+</pre>
+        </div>
+
+        <h3>Shared State via <code>multiprocessing.Value</code></h3>
+        <div class="table-wrap">
+            <table>
+                <tr><th>Flag</th><th>Type</th><th>Purpose</th></tr>
+                <tr><td><code>stop_all</code></td><td>global int</td><td>Graceful shutdown trigger (Ctrl+C)</td></tr>
+                <tr><td><code>No_Robot</code></td><td>per-robot int</td><td>Simulation mode — all commands return success</td></tr>
+                <tr><td><code>Logged_In</code></td><td>per-robot int</td><td>HMI login state; prevents duplicate control</td></tr>
+                <tr><td><code>Estop_Connected</code></td><td>per-robot int</td><td>E-Stop channel health; gates command channel</td></tr>
+                <tr><td><code>_logged_in_hmi_ip</code></td><td>per-robot c_wchar_p</td><td>Which HMI owns this robot (mutex)</td></tr>
+            </table>
+        </div>
+    </section>
+
+    <!-- ── 03. BINARY PROTOCOL ──────────────────────────── -->
+    <section>
+        <h2><span class="num">03</span> Custom Binary Protocol</h2>
+        <p>
+            Rather than HTTP, WebSockets, or MQTT, PosRobot uses a <strong>compact binary telegram protocol</strong>
+            — the kind of deterministic, low-overhead communication that industrial PLC engineers expect.
+            All telegram definitions live in a single <code>telegrams.json</code> configuration file.
+        </p>
+
+        <h3>Header Structure (19 bytes)</h3>
+        <div class="byte-row">
+            <div class="byte-cell magic">
+                <div class="val">POSR</div><div class="lbl">Magic [4B]</div>
+            </div>
+            <div class="byte-cell">
+                <div class="val">int32</div><div class="lbl">Code [4B]</div>
+            </div>
+            <div class="byte-cell">
+                <div class="val">YMD</div><div class="lbl">Date [3B]</div>
+            </div>
+            <div class="byte-cell">
+                <div class="val">hms</div><div class="lbl">Time [3B]</div>
+            </div>
+            <div class="byte-cell">
+                <div class="val">uint</div><div class="lbl">ms [4B]</div>
+            </div>
+            <div class="byte-cell magic">
+                <div class="val">1B</div><div class="lbl">Padding</div>
+            </div>
+        </div>
+
+        <div class="code-block">
+            <div class="label">Python — struct format</div>
+<pre>"&lt;4s i H B B B B B I"
+#  ^    ^  ^ ^ ^ ^ ^ ^ ^
+#  |    |  |             \__ milliseconds (unsigned int, 4B)
+#  |    |  \__ Year, Month, Day, Hour, Minute, Second (3×2B + 3×1B)
+#  |    \__ Telegram code (signed int, 4B)
+#  \__ Magic bytes "POSR" (4-char string)</pre>
+        </div>
+
+        <h3>Command Code Map</h3>
+        <div class="table-wrap">
+            <table>
+                <tr><th>Code</th><th>Command</th><th>Body</th><th>ACK</th><th>Notes</th></tr>
+                <tr><td><code>10000</code></td><td>Login</td><td><code>&lt;i 10s</code></td><td><code>10001</code></td><td>robot_id + password</td></tr>
+                <tr><td><code>11000</code></td><td>Heartbeat</td><td><em>none</em></td><td>—</td><td>Keep-alive; prevents E-Stop timeout</td></tr>
+                <tr><td><code>11020</code></td><td>E-Stop</td><td><code>i i</code></td><td><code>11021</code></td><td>0=allow, 1=settle_then_cut, 2=stop, 3=shutdown</td></tr>
+                <tr><td><code>12000</code></td><td>Logout</td><td><code>i 10s</code></td><td><code>12001</code></td><td>Releases robot lease</td></tr>
+                <tr><td><code>12020</code></td><td>Motor Power</td><td><code>i i</code></td><td><code>12021</code></td><td>1=on, 2=off</td></tr>
+                <tr><td><code>12030</code></td><td>Robot Mode</td><td><code>i i i</code></td><td><code>12031</code></td><td>Walk/Sit/Stand/Stairs/etc.</td></tr>
+                <tr><td><code>12080</code></td><td>Motion Control</td><td><code>i i</code></td><td><code>12081</code></td><td>Direction: 1–8 (joystick axes)</td></tr>
+                <tr><td><code>12110</code></td><td>Walk Mode</td><td><code>i i</code></td><td><code>12111</code></td><td>1=Walk, 2=Crawl</td></tr>
+                <tr><td><code>12120</code></td><td>Position</td><td><code>i i</code></td><td><code>12121</code></td><td>1=Stand, 2=Sit, 3=Home</td></tr>
+            </table>
+        </div>
+        <p style="font-size:0.82rem; color:var(--text-dim);">
+            Full protocol: 16 command types. Also includes: Dock Active (11010), Reboot (12010),
+            Capture (12050), Docking (12060), Camera Control (12070), Robot Speed (12090), Robot Height (12100).
+        </p>
+    </section>
+
+    <!-- ── 04. SAFETY ───────────────────────────────────── -->
+    <section>
+        <h2><span class="num">04</span> Safety Architecture</h2>
+        <p>
+            This is where the project diverges from hobbyist robot controllers.
+            The safety design follows industrial automation patterns:
+        </p>
+
+        <div class="safety-grid">
+            <div class="safety-card">
+                <h4><span class="dot green"></span> Dual-Channel Isolation</h4>
+                <p>
+                    E-Stop and Command run in separate <code>multiprocessing.Process</code> instances
+                    on separate TCP ports. A crash in the command process <strong>cannot</strong> affect
+                    the E-Stop channel.
+                </p>
+            </div>
+            <div class="safety-card">
+                <h4><span class="dot red"></span> Heartbeat Watchdog</h4>
+                <p>
+                    HMI sends heartbeat (code 11000) continuously. If no header arrives within the
+                    socket timeout (3 seconds), <code>settle_then_cut()</code> is called automatically —
+                    the robot sits down and cuts motor power.
+                </p>
+            </div>
+            <div class="safety-card">
+                <h4><span class="dot blue"></span> Lease Management</h4>
+                <p>
+                    Spot SDK's lease system prevents multiple controllers. <code>LeaseKeepAlive</code>
+                    with <code>return_at_exit=True</code> ensures the lease is returned even
+                    on unexpected process termination.
+                </p>
+            </div>
+            <div class="safety-card">
+                <h4><span class="dot amber"></span> Login Mutual Exclusion</h4>
+                <p>
+                    Only one HMI can control a robot at a time. The <code>_logged_in_hmi_ip</code>
+                    flag prevents duplicate login (error 10001/10002). The E-Stop port also
+                    validates the connecting HMI's IP address.
+                </p>
+            </div>
+        </div>
+
+        <h3>Graceful Shutdown Sequence</h3>
+        <div class="arch-diagram">
+<pre>
+<span class="comment"># Ctrl+C triggers cascading shutdown:</span>
+<span class="red">Ctrl+C</span>
+  <span class="arrow">├─►</span> stop_all.value = 1
+  <span class="arrow">├─►</span> log_queue.put(None)      <span class="arrow">→</span> <span class="process">logger_process</span> exits
+  <span class="arrow">├─►</span> status_queue.put(None)   <span class="arrow">→</span> <span class="process">status_queue_process</span> exits
+  <span class="arrow">└─►</span> server_thread.join()    <span class="arrow">→</span> <span class="process">tcp_server</span> closes sockets
+       <span class="arrow">└─►</span> hmi_connection   <span class="arrow">→</span> socket.close()
+            <span class="arrow">└─►</span> Spot.__del__()  <span class="arrow">→</span> lease returned, E-Stop settled
+</pre>
+        </div>
+    </section>
+
+    <!-- ── 05. SPOT INTEGRATION ────────────────────────── -->
+    <section>
+        <h2><span class="num">05</span> Spot SDK Integration</h2>
+
+        <div class="two-col">
+            <div>
+                <h3>Locomotion</h3>
+                <div class="table-wrap">
+                <table>
+                    <tr><th>Mode</th><th>Handler Method</th></tr>
+                    <tr><td>Walk</td><td><code>MotionHandler.walk()</code></td></tr>
+                    <tr><td>Sit</td><td><code>MotionHandler.sit()</code></td></tr>
+                    <tr><td>Stand</td><td><code>MotionHandler.stand()</code></td></tr>
+                    <tr><td>Stairs</td><td><code>_stairs()</code></td></tr>
+                    <tr><td>Jog</td><td><code>_jog()</code></td></tr>
+                    <tr><td>Amble</td><td><code>_amble()</code></td></tr>
+                    <tr><td>Crawl</td><td><code>_crawl()</code></td></tr>
+                    <tr><td>Hop</td><td><code>_hop()</code></td></tr>
+                    <tr><td>Self-Right</td><td><code>_selfright()</code></td></tr>
+                </table>
+                </div>
+            </div>
+            <div>
+                <h3>Sensors & Peripherals</h3>
+                <div class="table-wrap">
+                <table>
+                    <tr><th>Subsystem</th><th>Client</th></tr>
+                    <tr><td>5× Body Cameras</td><td><code>ImageClient</code></td></tr>
+                    <tr><td>PTZ Camera</td><td><code>PtzClient</code></td></tr>
+                    <tr><td>IR/Thermal</td><td><code>CompositorClient</code></td></tr>
+                    <tr><td>LED Lights</td><td><code>LightingClient</code></td></tr>
+                    <tr><td>Battery/Power</td><td><code>RobotStateClient</code></td></tr>
+                    <tr><td>Joint States</td><td><code>RobotStateClient</code></td></tr>
+                    <tr><td>Kinematics</td><td><code>RobotStateClient</code></td></tr>
+                    <tr><td>E-Stop States</td><td><code>EstopClient</code></td></tr>
+                    <tr><td>Foot/Terrain</td><td><code>RobotStateClient</code></td></tr>
+                </table>
+                </div>
+            </div>
+        </div>
+
+        <h3>Camera Image Pipeline</h3>
+        <div class="code-block">
+            <div class="label">CameraHandler — response_handler()</div>
+<pre>def response_handler(self, image_responses):
+    for image in image_responses:
+        dtype = np.uint16 if depth_format else np.uint8
+        img = np.frombuffer(image.shot.image.data, dtype=dtype)
+
+        if image.shot.image.format == FORMAT_RAW:
+            img = img.reshape((image.shot.image.rows, image.shot.image.cols, num_bytes))
+        else:
+            img = cv2.imdecode(img, -1)      <span class="comment"># JPEG decode</span>
+
+        img = ndimage.rotate(img, ROTATION_ANGLE[image.source.name])
+        <span class="comment"># Each camera has a hardware-specific rotation:
+        # back=0°, frontleft=-78°, frontright=-102°, left=0°, right=180°</span></pre>
+        </div>
+    </section>
+
+    <!-- ── 06. DATABASE ─────────────────────────────────── -->
+    <section>
+        <h2><span class="num">06</span> Database-Driven Fleet Management</h2>
+        <p>
+            Robot configuration is <strong>not hardcoded</strong>. At startup, the server queries the
+            <code>Robots</code> table and dynamically instantiates robot objects. Adding a new robot
+            to the fleet is a database operation — no code changes, no restart.
+        </p>
+
+        <div class="arch-diagram">
+<pre>
+<span class="comment"># main() — robot factory from DB</span>
+<span class="keyword">for</span> _, row <span class="keyword">in</span> dbHandler.get_df(<span class="string">"SELECT * FROM robots"</span>).iterrows():
+    <span class="keyword">if</span> str(row[<span class="string">"model"</span>]).lower() == <span class="string">"spot"</span>:
+        aRobotData = CommonRobotData(
+            log_dir, *dbHandler.get_values(query % row[<span class="string">"robotid"</span>])
+        )
+        robots_dic[row[<span class="string">"robotid"</span>]] = Spot(row[<span class="string">"robotid"</span>], aRobotData, status_queue)
+    <span class="comment"># Future: elif row["model"] == "ur5": robots_dic[...] = UR5(...)</span>
+</pre>
+        </div>
+
+        <h3>Schema Overview (8 Tables)</h3>
+        <div class="table-wrap">
+            <table>
+                <tr><th>Table</th><th>Purpose</th><th>Notable Columns</th></tr>
+                <tr><td><code>Robots</code></td><td>Robot inventory & configuration</td><td>model, ip, estopport, port, kinematic limits</td></tr>
+                <tr><td><code>SpotStatus</code></td><td>Real-time telemetry</td><td>batterylevel, networkstrength, location, status</td></tr>
+                <tr><td><code>Missions</code></td><td>Mission definitions</td><td>missionname, version, description</td></tr>
+                <tr><td><code>MissionData</code></td><td>Mission execution logs</td><td>timestamp, imagepath</td></tr>
+                <tr><td><code>HMITasks</code></td><td>Task assignments</td><td>robotgroupid, displayname, level</td></tr>
+                <tr><td><code>RobotGroups</code></td><td>Multi-robot grouping</td><td>robotgroupname, description</td></tr>
+                <tr><td><code>Users</code></td><td>User accounts</td><td>username, password</td></tr>
+                <tr><td><code>UserPermissions</code></td><td>Access control</td><td>userid, robotid, level</td></tr>
+            </table>
+        </div>
+    </section>
+
+    <!-- ── 07. ERROR HANDLING ───────────────────────────── -->
+    <section>
+        <h2><span class="num">07</span> Error Code Taxonomy</h2>
+        <p>
+            Every error condition has a numeric code in a structured range system,
+            making it easy to diagnose issues from HMI-side telemetry.
+        </p>
+
+        <div class="error-grid">
+            <div class="error-card e1">
+                <div class="range">10001–10013</div>
+                <div class="label">Server Layer</div>
+                <p style="font-size:0.78rem; color:var(--text-dim); margin:6px 0 0;">Login, duplicate HMI, control acquisition</p>
+            </div>
+            <div class="error-card e2">
+                <div class="range">20001–21000</div>
+                <div class="label">HMI Layer</div>
+                <p style="font-size:0.78rem; color:var(--text-dim); margin:6px 0 0;">Unknown commands, invalid values</p>
+            </div>
+            <div class="error-card e3">
+                <div class="range">30001–31103</div>
+                <div class="label">Robot Layer</div>
+                <p style="font-size:0.78rem; color:var(--text-dim); margin:6px 0 0;">Connection, power, motor, lease errors</p>
+            </div>
+            <div class="error-card e9">
+                <div class="range">90000–99999</div>
+                <div class="label">System Layer</div>
+                <p style="font-size:0.78rem; color:var(--text-dim); margin:6px 0 0;">Unexpected exceptions, process failures</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── 08. LESSONS ──────────────────────────────────── -->
+    <section>
+        <h2><span class="num">08</span> Lessons Learned</h2>
+
+        <div class="lesson-box">
+            <h4>Pickle Isn't Always the Answer</h4>
+            <p>
+                The original design shared Spot instances via <code>multiprocessing.Manager</code> dict.
+                Online testing revealed Spot SDK objects (wrapping gRPC channels) can't be pickled.
+                This forced a full redesign to process-per-connection with pipe/socket communication —
+                which turned out to be <strong>better for safety isolation anyway</strong>.
+                The "limitation" became the architecture's strongest feature.
+            </p>
+        </div>
+
+        <div class="lesson-box">
+            <h4>Industrial Protocols Are Worth the Effort</h4>
+            <p>
+                Building a custom binary protocol may seem like reinventing the wheel when REST exists,
+                but for real-time robot control, the deterministic 19-byte header with packed structs
+                provides predictability that JSON-over-HTTP cannot match. Plus, the JSON-defined
+                telegram schema makes it configurable without recompilation.
+            </p>
+        </div>
+
+        <div class="lesson-box">
+            <h4>No-Robot Mode Is Essential</h4>
+            <p>
+                The <code>No_Robot</code> flag — tested first, hardware second — allowed HMI development
+                to proceed in parallel with robot integration. Every command path returns correct mock
+                responses, making the HMI team unblocked without a Spot on every desk.
+            </p>
+        </div>
+    </section>
+
+    <!-- ── 09. TECH STACK ───────────────────────────────── -->
+    <section>
+        <h2><span class="num">09</span> Tech Stack</h2>
+
+        <div class="table-wrap">
+            <table>
+                <tr><th>Layer</th><th>Technology</th><th>Detail</th></tr>
+                <tr><td>Language</td><td>Python</td><td>3.8–3.10</td></tr>
+                <tr><td>Robot SDK</td><td>bosdyn-client v3.3.0</td><td>Spot gRPC API + Choreography + Mission</td></tr>
+                <tr><td>Concurrency</td><td>multiprocessing</td><td>Process, Queue, Value (shared ctypes)</td></tr>
+                <tr><td>Networking</td><td>socket + struct</td><td>Raw TCP with custom binary packing</td></tr>
+                <tr><td>Database</td><td>SQL Server 2016</td><td>pyodbc + pandas DataFrames</td></tr>
+                <tr><td>Vision</td><td>OpenCV 4.8 + NumPy + SciPy</td><td>Image decode, reshape, rotation correction</td></tr>
+                <tr><td>Web Scraping</td><td>requests + BeautifulSoup4</td><td>Session-auth data extraction</td></tr>
+                <tr><td>Logging</td><td>stdlib logging</td><td>QueueHandler + TimedRotatingFileHandler</td></tr>
+                <tr><td>Auth</td><td>PyJWT</td><td>Imported; planned for future API auth</td></tr>
+                <tr><td>Source</td><td>~1,500 lines Python</td><td>14 modules across 2 packages</td></tr>
+            </table>
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    <div class="container">
+        <p>
+            <a href="../../index.html">← Back to Portfolio</a>
+        </p>
+        <p style="margin-top: 12px;">
+            PosRobot &middot; Industrial Robot Control Server &middot; Built by Rick
+        </p>
+    </div>
+</footer>
+
+</body>
+</html>
