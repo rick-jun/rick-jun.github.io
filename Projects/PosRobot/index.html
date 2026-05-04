@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -34,6 +34,13 @@
         nav a { color: var(--text-dim); text-decoration: none; font-size: 0.85rem; }
         nav a:hover { color: var(--text); }
         nav .brand { color: var(--accent); font-weight: 700; margin-right: auto; }
+        nav .spacer { flex: 1; }
+
+        /* Lang toggle in nav */
+        .lang-toggle { display: flex; gap: 2px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 2px; }
+        .lang-toggle button { background: none; border: none; color: #6b7280; font-family: var(--font-mono); font-size: 10px; padding: 3px 10px; border-radius: 13px; cursor: pointer; letter-spacing: 0.04em; transition: all 0.2s; }
+        .lang-toggle button.active { background: rgba(232,145,58,0.2); color: #e8913a; font-weight: 700; }
+        .lang-toggle button:hover { color: #fff; }
 
         /* ── Hero ── */
         .hero {
@@ -151,57 +158,61 @@
 <nav>
     <div class="inner">
         <a href="../../index.html" class="brand">Rick</a>
-        <a href="../../index.html">Home</a>
-        <a href="../../index.html#projects">Projects</a>
+        <a href="../../index.html" data-i18n="nav-home">홈</a>
+        <a href="../../index.html#projects" data-i18n="nav-projects">프로젝트</a>
+        <span class="spacer"></span>
+        <div class="lang-toggle">
+            <button id="btn-ko" class="active" onclick="setLang('ko')">한글</button>
+            <button id="btn-en" onclick="setLang('en')">ENG</button>
+        </div>
     </div>
 </nav>
 
 <header class="hero">
-    <p class="eyebrow">Industrial Automation · Python · Boston Dynamics</p>
+    <p class="eyebrow" data-i18n="hero-eyebrow">산업 자동화 · Python · Boston Dynamics</p>
     <h1>PosRobot</h1>
-    <p class="subtitle">
-        Multi-process control server bridging HMIs to Boston Dynamics Spot robots via a custom binary protocol — with dual-channel safety architecture and database-driven fleet management.
+    <p class="subtitle" data-i18n="hero-sub">
+        HMI와 Boston Dynamics Spot 로봇을 잇는 멀티프로세스 제어 서버 — 커스텀 바이너리 프로토콜, 이중 안전채널 아키텍처, DB 기반 플릿 관리.
     </p>
     <div class="tags">
         <span class="tag hl">Python 3.10</span>
         <span class="tag hl">Multiprocessing</span>
         <span class="tag">BD Spot SDK 3.3</span>
-        <span class="tag">Custom Binary Protocol</span>
+        <span class="tag" data-i18n="tag-protocol">커스텀 바이너리 프로토콜</span>
         <span class="tag">SQL Server</span>
         <span class="tag">OpenCV</span>
-        <span class="tag">E-Stop Safety</span>
+        <span class="tag" data-i18n="tag-estop">E-Stop 안전설계</span>
     </div>
 </header>
 
 <main class="container">
 
-    <!-- ── 1. WHY ──────────────────────── -->
     <section>
-        <h2>The Challenge</h2>
-        <p>
-            Controlling an industrial robot remotely is a <strong>safety-critical systems problem</strong> — not just networking.
-            Early prototyping revealed that Spot SDK's gRPC objects <strong>cannot be pickled</strong>, breaking the initial
-            shared-memory multi-process design. The architecture had to be redesigned around process isolation and socket communication.
+        <h2 data-i18n="s1-title">해결 과제</h2>
+        <p data-i18n="s1-p">
+            산업용 로봇을 원격 제어하는 것은 단순한 네트워킹 문제가 아닌 <strong>안전이 중요한 시스템 엔지니어링 문제</strong>입니다.
+            초기 프로토타입에서 Spot SDK의 gRPC 객체가 <strong>pickle이 불가능</strong>하다는 것을 발견했고,
+            이로 인해 초기 shared-memory 멀티프로세스 설계가 무산되었습니다.
+            결국 프로세스 격리와 소켓 통신 기반으로 아키텍처를 완전히 재설계했습니다.
         </p>
     </section>
 
-    <!-- ── 2. ARCHITECTURE ─────────────── -->
     <section>
-        <h2>Process Architecture</h2>
-        <p>Each HMI connection gets its own process. Safety (E-Stop) and command channels are <strong>isolated in separate processes</strong> on separate TCP ports — a crash in one cannot affect the other.</p>
+        <h2 data-i18n="s2-title">프로세스 아키텍처</h2>
+        <p data-i18n="s2-p">각 HMI 연결은 독립된 프로세스로 실행됩니다. 안전채널(E-Stop)과 명령채널은 <strong>별도 프로세스에서 별도 TCP 포트</strong>로 분리되어 — 한쪽이 죽어도 다른 쪽에 영향을 주지 않습니다.</p>
 
         <div class="arch">
 <pre>
-<span class="c"># Process Tree (one robot, one HMI)</span>
+<span class="c" data-i18n="arch-comment"># 프로세스 트리 (로봇 1대, HMI 1개 연결)</span>
 <span class="kw">main</span>()
-  ├── <span class="pr">logger_process</span>        <span class="ar">← Queue →</span> <span class="c">logs to disk</span>
-  ├── <span class="pr">status_queue</span>         <span class="ar">← Queue →</span> <span class="c">telemetry → SQL Server</span>
-  └── <span class="pr">tcp_server :50000</span>    <span class="c">accepts HMI connections</span>
-        └── <span class="pr">hmi_connection</span>    <span class="c">auth + robot assignment</span>
+  ├── <span class="pr">logger_process</span>        <span class="ar">← Queue →</span> <span class="c" data-i18n="arch-log">로그 디스크 기록</span>
+  ├── <span class="pr">status_queue</span>         <span class="ar">← Queue →</span> <span class="c" data-i18n="arch-status">텔레메트리 → SQL Server</span>
+  └── <span class="pr">tcp_server :50000</span>    <span class="c" data-i18n="arch-tcp">HMI 연결 수락</span>
+        └── <span class="pr">hmi_connection</span>    <span class="c" data-i18n="arch-hmi">인증 + 로봇 할당</span>
               └── <span class="fn">Spot.login()</span>
-                    ├── <span class="pr">estop()</span>      <span class="c">E-Stop channel (dedicated port)</span>
-                    │     <span class="ar">└►</span> <span class="kw">if no heartbeat in 3s</span> <span class="ar">→ settle_then_cut()</span>
-                    └── <span class="pr">hmi()</span>        <span class="c">Command channel (dedicated port)</span>
+                    ├── <span class="pr">estop()</span>      <span class="c" data-i18n="arch-estop">E-Stop 채널 (전용 포트)</span>
+                    │     <span class="ar">└►</span> <span class="kw" data-i18n="arch-heartbeat">3초 내 하트비트 없으면</span> <span class="ar">→ settle_then_cut()</span>
+                    └── <span class="pr">hmi()</span>        <span class="c" data-i18n="arch-cmd">명령 채널 (전용 포트)</span>
                           <span class="ar">└►</span> <span class="fn">command_control()</span>
                                 <span class="ar">├►</span> MotionHandler <span class="ar">→</span> Spot (gRPC)
                                 <span class="ar">├►</span> CameraHandler <span class="ar">→</span> Spot CAM
@@ -210,88 +221,84 @@
         </div>
     </section>
 
-    <!-- ── 3. PROTOCOL ─────────────────── -->
     <section>
-        <h2>Custom Binary Protocol</h2>
-        <p>
-            Instead of HTTP or MQTT, PosRobot uses a <strong>compact binary telegram</strong> — the kind of deterministic,
-            low-overhead communication industrial PLC engineers expect. All definitions live in <code>telegrams.json</code>.
+        <h2 data-i18n="s3-title">커스텀 바이너리 프로토콜</h2>
+        <p data-i18n="s3-p">
+            HTTP나 MQTT 대신 PosRobot은 <strong>컴팩트한 바이너리 텔레그램</strong>을 사용합니다 — 산업용 PLC 엔지니어가 기대하는 결정론적이고 저오버헤드 통신 방식입니다.
+            모든 정의는 <code>telegrams.json</code> 파일 하나에 있습니다.
         </p>
 
-        <p style="font-size:0.82rem; color:var(--text-dim); margin-bottom:6px;"><strong style="color:var(--text);">19-byte Header</strong> — format <code>&lt;4s i H B B B B B I</code></p>
+        <p style="font-size:0.82rem; color:var(--text-dim); margin-bottom:6px;"><strong style="color:var(--text);" data-i18n="proto-header-label">19바이트 헤더</strong> — format <code>&lt;4s i H B B B B B I</code></p>
         <div class="bytes">
-            <div class="byte m"><div class="v">POSR</div><div class="l">Magic 4B</div></div>
-            <div class="byte"><div class="v">int32</div><div class="l">Code 4B</div></div>
-            <div class="byte"><div class="v">YMD</div><div class="l">Date 3B</div></div>
-            <div class="byte"><div class="v">hms</div><div class="l">Time 3B</div></div>
-            <div class="byte"><div class="v">uint</div><div class="l">ms 4B</div></div>
-            <div class="byte m"><div class="v">1B</div><div class="l">Pad</div></div>
+            <div class="byte m"><div class="v">POSR</div><div class="l" data-i18n="byte-magic">Magic 4B</div></div>
+            <div class="byte"><div class="v">int32</div><div class="l" data-i18n="byte-code">Code 4B</div></div>
+            <div class="byte"><div class="v">YMD</div><div class="l" data-i18n="byte-date">Date 3B</div></div>
+            <div class="byte"><div class="v">hms</div><div class="l" data-i18n="byte-time">Time 3B</div></div>
+            <div class="byte"><div class="v">uint</div><div class="l" data-i18n="byte-ms">ms 4B</div></div>
+            <div class="byte m"><div class="v">1B</div><div class="l" data-i18n="byte-pad">Pad</div></div>
         </div>
 
         <div class="proto-table tw">
             <table>
-                <tr><th>Code</th><th>Command</th><th>Body</th><th>ACK</th></tr>
-                <tr><td><code>10000</code></td><td>Login</td><td>robot_id + password</td><td>10001</td></tr>
-                <tr><td><code>11000</code></td><td>Heartbeat</td><td><em>none</em></td><td>—</td></tr>
-                <tr><td><code>11020</code></td><td>E-Stop</td><td>allow / settle_then_cut / stop / shutdown</td><td>11021</td></tr>
-                <tr><td><code>12020</code></td><td>Motor Power</td><td>on / off</td><td>12021</td></tr>
-                <tr><td><code>12030</code></td><td>Robot Mode</td><td>Walk · Sit · Stand · Stairs · Jog · Amble · Crawl · Hop</td><td>12031</td></tr>
-                <tr><td><code>12080</code></td><td>Motion</td><td>8-axis joystick direction</td><td>12081</td></tr>
-                <tr><td><code>12120</code></td><td>Position</td><td>Stand / Sit / Home</td><td>12121</td></tr>
+                <tr><th data-i18n="tbl-code">코드</th><th data-i18n="tbl-cmd">명령</th><th data-i18n="tbl-body">본문</th><th>ACK</th></tr>
+                <tr><td><code>10000</code></td><td data-i18n="cmd-login">로그인</td><td data-i18n="body-login">로봇ID + 비밀번호</td><td>10001</td></tr>
+                <tr><td><code>11000</code></td><td data-i18n="cmd-heartbeat">하트비트</td><td><em data-i18n="body-none">없음</em></td><td>—</td></tr>
+                <tr><td><code>11020</code></td><td data-i18n="cmd-estop">비상정지</td><td data-i18n="body-estop">허용 / settle_then_cut / 정지 / 셧다운</td><td>11021</td></tr>
+                <tr><td><code>12020</code></td><td data-i18n="cmd-power">모터 전원</td><td data-i18n="body-power">켜기 / 끄기</td><td>12021</td></tr>
+                <tr><td><code>12030</code></td><td data-i18n="cmd-mode">로봇 모드</td><td data-i18n="body-mode">걷기 · 앉기 · 서기 · 계단 · 조깅 · 앰블 · 기어가기 · 홉</td><td>12031</td></tr>
+                <tr><td><code>12080</code></td><td data-i18n="cmd-motion">모션</td><td data-i18n="body-motion">8방향 조이스틱</td><td>12081</td></tr>
+                <tr><td><code>12120</code></td><td data-i18n="cmd-pos">자세</td><td data-i18n="body-pos">서기 / 앉기 / 홈</td><td>12121</td></tr>
             </table>
         </div>
-        <p style="font-size:0.75rem; color:var(--text-dim);">Full protocol: 16 commands with request/ACK pairing. Also includes: Dock, Reboot, Capture, Camera Control, Speed, Height.</p>
+        <p style="font-size:0.75rem; color:var(--text-dim);" data-i18n="proto-footer">전체 프로토콜: 16개 명령어 + 요청/ACK 페어링. Dock, Reboot, Capture, Camera Control, Speed, Height 포함.</p>
     </section>
 
-    <!-- ── 4. SAFETY ────────────────────── -->
     <section>
-        <h2>Safety Design</h2>
+        <h2 data-i18n="s4-title">안전 설계</h2>
         <div class="safety-grid">
             <div class="s-card">
-                <h4><span class="dot g"></span>Dual-Channel Isolation</h4>
-                <p>E-Stop and Command are separate processes on separate ports. Command crash ≠ safety compromise.</p>
+                <h4><span class="dot g"></span><span data-i18n="safe1-title">이중 채널 격리</span></h4>
+                <p data-i18n="safe1-p">E-Stop과 명령은 별도 포트/프로세스에서 실행. 명령 채널 충돌 ≠ 안전 손상.</p>
             </div>
             <div class="s-card">
-                <h4><span class="dot r"></span>Heartbeat Watchdog</h4>
-                <p>HMI sends heartbeat (code 11000) continuously. 3-second timeout triggers automatic <code>settle_then_cut()</code>.</p>
+                <h4><span class="dot r"></span><span data-i18n="safe2-title">하트비트 감시</span></h4>
+                <p data-i18n="safe2-p">HMI가 지속적으로 하트비트(코드 11000) 전송. 3초 타임아웃 시 자동 <code>settle_then_cut()</code>.</p>
             </div>
             <div class="s-card">
-                <h4><span class="dot b"></span>Lease Management</h4>
-                <p>Spot SDK lease with <code>return_at_exit=True</code> — lease is always returned, even on crash.</p>
+                <h4><span class="dot b"></span><span data-i18n="safe3-title">리스(Lease) 관리</span></h4>
+                <p data-i18n="safe3-p">Spot SDK 리스 + <code>return_at_exit=True</code> — 크래시 발생해도 리스 반환 보장.</p>
             </div>
             <div class="s-card">
-                <h4><span class="dot a"></span>Mutual Exclusion</h4>
-                <p>Only one HMI per robot. IP-validated login prevents duplicate control (errors 10001/10002).</p>
+                <h4><span class="dot a"></span><span data-i18n="safe4-title">상호 배제</span></h4>
+                <p data-i18n="safe4-p">로봇당 하나의 HMI만 연결. IP 검증 로그인으로 중복 제어 방지 (에러 10001/10002).</p>
             </div>
         </div>
     </section>
 
-    <!-- ── 5. LESSONS ──────────────────── -->
     <section>
-        <h2>Key Insights</h2>
+        <h2 data-i18n="s5-title">핵심 인사이트</h2>
         <div class="box">
-            <h4>Pickle Limitation → Better Design</h4>
-            <p>The original shared-memory design failed because Spot SDK objects can't be pickled. The forced redesign to process-per-connection with socket communication <strong>became the architecture's strongest safety feature</strong>.</p>
+            <h4 data-i18n="insight1-title">Pickle 제약 → 더 나은 설계</h4>
+            <p data-i18n="insight1-p">최초 shared-memory 설계는 Spot SDK 객체가 pickle 불가능해 실패. 소켓 통신 기반 프로세스-per-커넥션으로 재설계한 것이 <strong>아키텍처의 가장 강력한 안전 기능</strong>이 되었습니다.</p>
         </div>
         <div class="box">
-            <h4>No-Robot Mode Unblocked Development</h4>
-            <p>The <code>No_Robot</code> flag returns mock success for every command — HMI development proceeded in parallel without a Spot robot on every desk.</p>
+            <h4 data-i18n="insight2-title">No-Robot 모드로 개발 병행</h4>
+            <p data-i18n="insight2-p"><code>No_Robot</code> 플래그가 모든 명령에 mock 성공을 반환 — Spot 로봇 없이도 HMI 개발을 병행할 수 있었습니다.</p>
         </div>
     </section>
 
-    <!-- ── 6. TECH STACK ────────────────── -->
     <section>
-        <h2>Tech Stack</h2>
+        <h2 data-i18n="s6-title">기술 스택</h2>
         <div class="tw">
         <table>
-            <tr><th>Layer</th><th>Technology</th></tr>
-            <tr><td>Language</td><td>Python 3.8–3.10</td></tr>
-            <tr><td>Robot SDK</td><td>bosdyn-client v3.3.0 (Spot gRPC + Choreography + Mission)</td></tr>
-            <tr><td>Concurrency</td><td>multiprocessing — Process, Queue, Value</td></tr>
-            <tr><td>Networking</td><td>Raw TCP/IP + struct binary packing</td></tr>
-            <tr><td>Database</td><td>SQL Server 2016 (pyodbc + pandas)</td></tr>
-            <tr><td>Vision</td><td>OpenCV 4.8 + NumPy + SciPy</td></tr>
-            <tr><td>Codebase</td><td>~1,500 lines · 14 modules · 2 packages</td></tr>
+            <tr><th data-i18n="stack-layer">계층</th><th data-i18n="stack-tech">기술</th></tr>
+            <tr><td data-i18n="stack-lang">언어</td><td>Python 3.8–3.10</td></tr>
+            <tr><td data-i18n="stack-sdk">로봇 SDK</td><td>bosdyn-client v3.3.0 (Spot gRPC + Choreography + Mission)</td></tr>
+            <tr><td data-i18n="stack-concurrency">동시성</td><td>multiprocessing — Process, Queue, Value</td></tr>
+            <tr><td data-i18n="stack-net">네트워킹</td><td>Raw TCP/IP + struct 바이너리 패킹</td></tr>
+            <tr><td data-i18n="stack-db">데이터베이스</td><td>SQL Server 2016 (pyodbc + pandas)</td></tr>
+            <tr><td data-i18n="stack-vision">비전</td><td>OpenCV 4.8 + NumPy + SciPy</td></tr>
+            <tr><td data-i18n="stack-codebase">코드베이스</td><td>~1,500 줄 · 14개 모듈 · 2개 패키지</td></tr>
         </table>
         </div>
     </section>
@@ -299,9 +306,172 @@
 </main>
 
 <footer>
-    <p><a href="../../index.html">← Back to Portfolio</a></p>
-    <p style="margin-top:8px;">PosRobot · Industrial Robot Control Server · Built by Rick</p>
+    <p><a href="../../index.html" data-i18n="footer-back">← 포트폴리오로 돌아가기</a></p>
+    <p style="margin-top:8px;" data-i18n="footer-credit">PosRobot · 산업용 로봇 제어 서버 · Built by Rick</p>
 </footer>
+
+<!-- ── i18n ── -->
+<script>
+const i18n = {
+    ko: {
+        'nav-home': '홈',
+        'nav-projects': '프로젝트',
+        'hero-eyebrow': '산업 자동화 · Python · Boston Dynamics',
+        'hero-sub': 'HMI와 Boston Dynamics Spot 로봇을 잇는 멀티프로세스 제어 서버 — 커스텀 바이너리 프로토콜, 이중 안전채널 아키텍처, DB 기반 플릿 관리.',
+        'tag-protocol': '커스텀 바이너리 프로토콜',
+        'tag-estop': 'E-Stop 안전설계',
+        's1-title': '해결 과제',
+        's1-p': '산업용 로봇을 원격 제어하는 것은 단순한 네트워킹 문제가 아닌 <strong>안전이 중요한 시스템 엔지니어링 문제</strong>입니다. 초기 프로토타입에서 Spot SDK의 gRPC 객체가 <strong>pickle이 불가능</strong>하다는 것을 발견했고, 이로 인해 초기 shared-memory 멀티프로세스 설계가 무산되었습니다. 결국 프로세스 격리와 소켓 통신 기반으로 아키텍처를 완전히 재설계했습니다.',
+        's2-title': '프로세스 아키텍처',
+        's2-p': '각 HMI 연결은 독립된 프로세스로 실행됩니다. 안전채널(E-Stop)과 명령채널은 <strong>별도 프로세스에서 별도 TCP 포트</strong>로 분리되어 — 한쪽이 죽어도 다른 쪽에 영향을 주지 않습니다.',
+        'arch-comment': '# 프로세스 트리 (로봇 1대, HMI 1개 연결)',
+        'arch-log': '로그 디스크 기록',
+        'arch-status': '텔레메트리 → SQL Server',
+        'arch-tcp': 'HMI 연결 수락',
+        'arch-hmi': '인증 + 로봇 할당',
+        'arch-estop': 'E-Stop 채널 (전용 포트)',
+        'arch-heartbeat': '3초 내 하트비트 없으면',
+        'arch-cmd': '명령 채널 (전용 포트)',
+        's3-title': '커스텀 바이너리 프로토콜',
+        's3-p': 'HTTP나 MQTT 대신 PosRobot은 <strong>컴팩트한 바이너리 텔레그램</strong>을 사용합니다 — 산업용 PLC 엔지니어가 기대하는 결정론적이고 저오버헤드 통신 방식입니다. 모든 정의는 <code>telegrams.json</code> 파일 하나에 있습니다.',
+        'proto-header-label': '19바이트 헤더',
+        'byte-magic': 'Magic 4B',
+        'byte-code': 'Code 4B',
+        'byte-date': 'Date 3B',
+        'byte-time': 'Time 3B',
+        'byte-ms': 'ms 4B',
+        'byte-pad': 'Pad',
+        'tbl-code': '코드',
+        'tbl-cmd': '명령',
+        'tbl-body': '본문',
+        'cmd-login': '로그인',
+        'cmd-heartbeat': '하트비트',
+        'cmd-estop': '비상정지',
+        'cmd-power': '모터 전원',
+        'cmd-mode': '로봇 모드',
+        'cmd-motion': '모션',
+        'cmd-pos': '자세',
+        'body-login': '로봇ID + 비밀번호',
+        'body-none': '없음',
+        'body-estop': '허용 / settle_then_cut / 정지 / 셧다운',
+        'body-power': '켜기 / 끄기',
+        'body-mode': '걷기 · 앉기 · 서기 · 계단 · 조깅 · 앰블 · 기어가기 · 홉',
+        'body-motion': '8방향 조이스틱',
+        'body-pos': '서기 / 앉기 / 홈',
+        'proto-footer': '전체 프로토콜: 16개 명령어 + 요청/ACK 페어링. Dock, Reboot, Capture, Camera Control, Speed, Height 포함.',
+        'safe1-title': '이중 채널 격리',
+        'safe1-p': 'E-Stop과 명령은 별도 포트/프로세스에서 실행. 명령 채널 충돌 ≠ 안전 손상.',
+        'safe2-title': '하트비트 감시',
+        'safe2-p': 'HMI가 지속적으로 하트비트(코드 11000) 전송. 3초 타임아웃 시 자동 <code>settle_then_cut()</code>.',
+        'safe3-title': '리스(Lease) 관리',
+        'safe3-p': 'Spot SDK 리스 + <code>return_at_exit=True</code> — 크래시 발생해도 리스 반환 보장.',
+        'safe4-title': '상호 배제',
+        'safe4-p': '로봇당 하나의 HMI만 연결. IP 검증 로그인으로 중복 제어 방지 (에러 10001/10002).',
+        'insight1-title': 'Pickle 제약 → 더 나은 설계',
+        'insight1-p': '최초 shared-memory 설계는 Spot SDK 객체가 pickle 불가능해 실패. 소켓 통신 기반 프로세스-per-커넥션으로 재설계한 것이 <strong>아키텍처의 가장 강력한 안전 기능</strong>이 되었습니다.',
+        'insight2-title': 'No-Robot 모드로 개발 병행',
+        'insight2-p': '<code>No_Robot</code> 플래그가 모든 명령에 mock 성공을 반환 — Spot 로봇 없이도 HMI 개발을 병행할 수 있었습니다.',
+        'stack-layer': '계층',
+        'stack-tech': '기술',
+        'stack-lang': '언어',
+        'stack-sdk': '로봇 SDK',
+        'stack-concurrency': '동시성',
+        'stack-net': '네트워킹',
+        'stack-db': '데이터베이스',
+        'stack-vision': '비전',
+        'stack-codebase': '코드베이스',
+        'footer-back': '← 포트폴리오로 돌아가기',
+        'footer-credit': 'PosRobot · 산업용 로봇 제어 서버 · Built by Rick',
+    },
+    en: {
+        'nav-home': 'Home',
+        'nav-projects': 'Projects',
+        'hero-eyebrow': 'Industrial Automation · Python · Boston Dynamics',
+        'hero-sub': 'Multi-process control server bridging HMIs to Boston Dynamics Spot robots via a custom binary protocol — with dual-channel safety architecture and database-driven fleet management.',
+        'tag-protocol': 'Custom Binary Protocol',
+        'tag-estop': 'E-Stop Safety',
+        's1-title': 'The Challenge',
+        's1-p': 'Controlling an industrial robot remotely is a <strong>safety-critical systems problem</strong> — not just networking. Early prototyping revealed that Spot SDK\'s gRPC objects <strong>cannot be pickled</strong>, breaking the initial shared-memory multi-process design. The architecture had to be redesigned around process isolation and socket communication.',
+        's2-title': 'Process Architecture',
+        's2-p': 'Each HMI connection gets its own process. Safety (E-Stop) and command channels are <strong>isolated in separate processes</strong> on separate TCP ports — a crash in one cannot affect the other.',
+        'arch-comment': '# Process Tree (one robot, one HMI)',
+        'arch-log': 'logs to disk',
+        'arch-status': 'telemetry → SQL Server',
+        'arch-tcp': 'accepts HMI connections',
+        'arch-hmi': 'auth + robot assignment',
+        'arch-estop': 'E-Stop channel (dedicated port)',
+        'arch-heartbeat': 'if no heartbeat in 3s',
+        'arch-cmd': 'Command channel (dedicated port)',
+        's3-title': 'Custom Binary Protocol',
+        's3-p': 'Instead of HTTP or MQTT, PosRobot uses a <strong>compact binary telegram</strong> — the kind of deterministic, low-overhead communication industrial PLC engineers expect. All definitions live in <code>telegrams.json</code>.',
+        'proto-header-label': '19-byte Header',
+        'byte-magic': 'Magic 4B',
+        'byte-code': 'Code 4B',
+        'byte-date': 'Date 3B',
+        'byte-time': 'Time 3B',
+        'byte-ms': 'ms 4B',
+        'byte-pad': 'Pad',
+        'tbl-code': 'Code',
+        'tbl-cmd': 'Command',
+        'tbl-body': 'Body',
+        'cmd-login': 'Login',
+        'cmd-heartbeat': 'Heartbeat',
+        'cmd-estop': 'E-Stop',
+        'cmd-power': 'Motor Power',
+        'cmd-mode': 'Robot Mode',
+        'cmd-motion': 'Motion',
+        'cmd-pos': 'Position',
+        'body-login': 'robot_id + password',
+        'body-none': 'none',
+        'body-estop': 'allow / settle_then_cut / stop / shutdown',
+        'body-power': 'on / off',
+        'body-mode': 'Walk · Sit · Stand · Stairs · Jog · Amble · Crawl · Hop',
+        'body-motion': '8-axis joystick direction',
+        'body-pos': 'Stand / Sit / Home',
+        'proto-footer': 'Full protocol: 16 commands with request/ACK pairing. Also includes: Dock, Reboot, Capture, Camera Control, Speed, Height.',
+        'safe1-title': 'Dual-Channel Isolation',
+        'safe1-p': 'E-Stop and Command are separate processes on separate ports. Command crash ≠ safety compromise.',
+        'safe2-title': 'Heartbeat Watchdog',
+        'safe2-p': 'HMI sends heartbeat (code 11000) continuously. 3-second timeout triggers automatic <code>settle_then_cut()</code>.',
+        'safe3-title': 'Lease Management',
+        'safe3-p': 'Spot SDK lease with <code>return_at_exit=True</code> — lease is always returned, even on crash.',
+        'safe4-title': 'Mutual Exclusion',
+        'safe4-p': 'Only one HMI per robot. IP-validated login prevents duplicate control (errors 10001/10002).',
+        'insight1-title': 'Pickle Limitation → Better Design',
+        'insight1-p': 'The original shared-memory design failed because Spot SDK objects can\'t be pickled. The forced redesign to process-per-connection with socket communication <strong>became the architecture\'s strongest safety feature</strong>.',
+        'insight2-title': 'No-Robot Mode Unblocked Development',
+        'insight2-p': 'The <code>No_Robot</code> flag returns mock success for every command — HMI development proceeded in parallel without a Spot robot on every desk.',
+        'stack-layer': 'Layer',
+        'stack-tech': 'Technology',
+        'stack-lang': 'Language',
+        'stack-sdk': 'Robot SDK',
+        'stack-concurrency': 'Concurrency',
+        'stack-net': 'Networking',
+        'stack-db': 'Database',
+        'stack-vision': 'Vision',
+        'stack-codebase': 'Codebase',
+        'footer-back': '← Back to Portfolio',
+        'footer-credit': 'PosRobot · Industrial Robot Control Server · Built by Rick',
+    }
+};
+
+function setLang(lang) {
+    document.documentElement.lang = lang;
+    document.getElementById('btn-ko').classList.toggle('active', lang === 'ko');
+    document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+    localStorage.setItem('lang', lang);
+
+    const dict = i18n[lang];
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) el.innerHTML = dict[key];
+    });
+}
+
+// Auto-detect from main page's localStorage setting, default Korean
+const saved = localStorage.getItem('lang') || 'ko';
+setLang(saved);
+</script>
 
 </body>
 </html>
