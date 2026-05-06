@@ -413,6 +413,7 @@
     <p><a href="../../index.html" data-i18n="footer-back">← Back to Portfolio</a> &nbsp;·&nbsp; Rick Jun &nbsp;·&nbsp; <span data-i18n="footer-attr">Data from CTO Agent pipeline</span></p>
 </footer>
 
+<script src="portfolio_metrics.js"></script>
 <script>
 // ═══════════════════════════════════════════
 // i18n
@@ -522,15 +523,13 @@ function setLang(lang) {
         }
     });
 
-    // Re-render dynamic text that uses i18n
-    const agg = filterAndAggregate();
-    renderSummary(agg);
-    updateTableToggleText();
+    // Re-render dynamic text that uses i18n (only after state is initialized)
+    if (window.__stateReady) {
+        const agg = filterAndAggregate();
+        renderSummary(agg);
+        updateTableToggleText();
+    }
 }
-
-// Init
-const savedLang = localStorage.getItem('lang') || 'ko';
-setLang(savedLang);
 
 // ═══════════════════════════════════════════
 // STATE
@@ -547,18 +546,31 @@ const state = {
     colorMap: {},
     palette: ['#e8913a','#38bdf8','#4ec973','#f0c040','#e0555a','#a78bfa','#fb923c','#22d3ee','#f472b6','#a3e635']
 };
+window.__stateReady = true;
+
+// Apply saved language now that state exists.
+const savedLang = localStorage.getItem('lang') || 'ko';
+setLang(savedLang);
 
 // ═══════════════════════════════════════════
 // DATA LOADING
 // ═══════════════════════════════════════════
 async function loadData() {
+    // Prefer inline data (works under file:// where fetch is CORS-blocked).
+    if (window.PORTFOLIO_METRICS && Array.isArray(window.PORTFOLIO_METRICS.rows)) {
+        state.rawRows = window.PORTFOLIO_METRICS.rows;
+        state.generatedAt = window.PORTFOLIO_METRICS.generated_at || null;
+        state.colorMap = {};
+        renderAll();
+        return;
+    }
+    // Fallback: fetch JSON (works on github.io / http servers).
     try {
         const resp = await fetch('portfolio_metrics.json');
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         const json = await resp.json();
         state.rawRows = json.rows || [];
         state.generatedAt = json.generated_at || null;
-        // Build initial color map from unique dimension values
         state.colorMap = {};
     } catch (err) {
         console.warn('Could not load portfolio_metrics.json:', err.message);

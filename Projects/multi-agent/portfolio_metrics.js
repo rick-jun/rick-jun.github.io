@@ -1,0 +1,29 @@
+// Auto-generated companion to portfolio_metrics.json.
+// Loaded via <script src> so the dashboard works under file:// (where fetch is blocked by CORS).
+// Keep this file in sync with portfolio_metrics.json — same shape.
+window.PORTFOLIO_METRICS = {
+    "schema_version": 1,
+    "generated_at": "2026-05-05T16:53:50+09:00",
+    "generated_by": "cto-agent",
+    "currency": "USD",
+    "source": {
+        "projects_scanned": ["HandyPLC"],
+        "cost_log_paths": ["G:\\AgentAI\\HandyPLC\\Agents\\State\\cost_log.json"],
+        "notes": "Rows with backfilled=true were rebuilt from transcript JSONLs."
+    },
+    "rows": [
+        {
+            "date": "2026-05-05",
+            "project": "HandyPLC",
+            "agent": "unknown",
+            "model": "claude-opus-4-7",
+            "sessions": 1,
+            "input_tokens": 284,
+            "output_tokens": 118581,
+            "cache_read_tokens": 7131285,
+            "cache_write_tokens": 223856,
+            "cost_usd": 7.9307,
+            "backfilled": true
+        }
+    ]
+};
