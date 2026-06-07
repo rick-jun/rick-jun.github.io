@@ -1,0 +1,7 @@
+# Agent state files (not for public site)
+Agents/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
