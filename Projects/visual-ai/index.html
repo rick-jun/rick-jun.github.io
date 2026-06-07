@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisualAI — Industrial Configuration & Log Intelligence | Rick</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #0f1117; --surface: #1a1d24; --border: #2a2e3a;
+            --text: #c8ccd4; --text-dim: #6b7280; --accent: #e8913a;
+            --accent-dim: #b8722e; --green: #4ec973; --red: #e0555a; --blue: #5b9bd5;
+            --font-mono: 'SF Mono','Cascadia Code','Consolas',monospace;
+            --font-sans: 'Segoe UI','Inter',system-ui,-apple-system,sans-serif;
+            --max-w: 860px;
+        }
+
+        body {
+            background: var(--bg); color: var(--text);
+            font-family: var(--font-sans); line-height: 1.65;
+        }
+
+        /* ── Nav ── */
+        nav {
+            background: rgba(15,17,23,0.9); backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border); padding: 0 20px;
+            position: sticky; top: 0; z-index: 10;
+        }
+        nav .inner {
+            max-width: var(--max-w); margin: 0 auto;
+            display: flex; align-items: center; gap: 20px; height: 48px;
+        }
+        nav a { color: var(--text-dim); text-decoration: none; font-size: 0.85rem; }
+        nav a:hover { color: var(--text); }
+        nav .brand { color: var(--accent); font-weight: 700; margin-right: auto; }
+        nav .spacer { flex: 1; }
+
+        /* Lang toggle in nav */
+        .lang-toggle { display: flex; gap: 2px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 2px; }
+        .lang-toggle button { background: none; border: none; color: #6b7280; font-family: var(--font-mono); font-size: 10px; padding: 3px 10px; border-radius: 13px; cursor: pointer; letter-spacing: 0.04em; transition: all 0.2s; }
+        .lang-toggle button.active { background: rgba(232,145,58,0.2); color: #e8913a; font-weight: 700; }
+        .lang-toggle button:hover { color: #fff; }
+
+        /* ── Hero ── */
+        .hero {
+            max-width: var(--max-w); margin: 0 auto; padding: 56px 20px 40px;
+            border-bottom: 1px solid var(--border); margin-bottom: 40px;
+        }
+        .hero .eyebrow {
+            color: var(--accent); font-family: var(--font-mono);
+            font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 6px;
+        }
+        .hero h1 { font-size: 2.4rem; color: #fff; margin-bottom: 12px; }
+        .hero .subtitle { color: var(--text-dim); font-size: 1rem; max-width: 620px; margin-bottom: 18px; }
+        .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .tag {
+            background: var(--surface); border: 1px solid var(--border);
+            padding: 3px 10px; border-radius: 3px;
+            font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim);
+        }
+        .tag.hl { border-color: var(--accent-dim); color: var(--accent); }
+
+        /* ── Section ── */
+        .container { max-width: var(--max-w); margin: 0 auto; padding: 0 20px; }
+        section { margin-bottom: 44px; }
+        section h2 {
+            font-size: 1.2rem; color: #fff; margin-bottom: 14px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        section h2::before {
+            content: ''; width: 18px; height: 2px; background: var(--accent); display: block;
+        }
+        section p { color: var(--text-dim); margin-bottom: 12px; font-size: 0.9rem; }
+        section strong { color: var(--text); }
+
+        /* ── Labeled Box ── */
+        .box {
+            background: var(--surface); border-left: 3px solid var(--accent);
+            padding: 14px 18px; border-radius: 0 5px 5px 0; margin: 16px 0;
+        }
+        .box h4 { color: #fff; font-size: 0.88rem; margin-bottom: 4px; }
+        .box p { font-size: 0.82rem; margin: 0; }
+
+        /* ── Two Column ── */
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        @media (max-width: 560px) { .two-col { grid-template-columns: 1fr; } }
+
+        /* ── Code block ── */
+        .code {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 5px;
+            padding: 14px 18px; margin: 12px 0; overflow-x: auto;
+        }
+        .code pre { font-family: var(--font-mono); font-size: 0.73rem; line-height: 1.6; color: var(--text); }
+
+        /* ── Table ── */
+        .tw { overflow-x: auto; margin: 12px 0; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+        th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+        th { font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); background: var(--surface); }
+        td { color: var(--text); }
+        td code { background: rgba(255,255,255,0.04); padding: 2px 5px; border-radius: 2px; font-family: var(--font-mono); font-size: 0.76rem; }
+
+        /* ── Screenshots / media ── */
+        .shots { display: flex; flex-direction: column; gap: 14px; margin: 16px 0; }
+        .shot {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 6px; padding: 10px; overflow: hidden;
+        }
+        .shot img { width: 100%; height: auto; display: block; border-radius: 3px; }
+        .shot .cap {
+            font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-dim);
+            margin-top: 8px; padding: 0 4px;
+        }
+
+        /* ── Footer ── */
+        footer {
+            border-top: 1px solid var(--border); text-align: center; padding: 28px 20px;
+            color: var(--text-dim); font-size: 0.8rem;
+        }
+        footer a { color: var(--accent); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="inner">
+        <a href="../../index.html" class="brand">Rick</a>
+        <a href="../../index.html" data-i18n="nav-home">홈</a>
+        <a href="../../index.html#projects" data-i18n="nav-projects">프로젝트</a>
+        <span class="spacer"></span>
+        <div class="lang-toggle">
+            <button id="btn-ko" class="active" onclick="setLang('ko')">한글</button>
+            <button id="btn-en" onclick="setLang('en')">ENG</button>
+        </div>
+    </div>
+</nav>
+
+<header class="hero">
+    <p class="eyebrow" data-i18n="hero-eyebrow">산업 자동화 · 설정 형상 관리</p>
+    <h1>VisualAI — Industrial Configuration & Log Intelligence</h1>
+    <p class="subtitle" data-i18n="hero-sub">철강/코일 가공 생산라인의 제어 시스템 설정 변경을 실시간으로 감지하고, ELK 스택 기반 중앙 로그 집계 및 분석을 수행하는 산업용 모니터링 시스템</p>
+    <div class="tags">
+        <span class="tag hl">Python</span><span class="tag hl">Elasticsearch</span><span class="tag hl">Kibana</span><span class="tag">Logstash</span><span class="tag">Filebeat</span><span class="tag">Beyond Compare 2</span><span class="tag">Industrial IoT</span><span class="tag">Configuration Management</span>
+    </div>
+</header>
+
+<main class="container">
+
+    <!-- ─── EXAMPLE SECTION 1 — replace / duplicate as needed ──────────── -->
+    <section>
+        <h2 data-i18n="s1-title">시스템 개요</h2>
+        <p data-i18n="s1-p">VisualAI는 산업 생산라인의 제어 시스템 파라미터 파일(<code>*.pfa</code>) 변경을 실시간 감지합니다. Python Watchdog 서비스가 설정 파일 감시 디렉토리를 모니터링하며, 설정 변경 발생 시 Beyond Compare 2를 통해 바이너리 비교를 수행하고 변경 이력을 Elasticsearch에 기록합니다.</p>
+    </section>
+
+    <!-- ─── EXAMPLE SECTION 2 ──────────────────────────────────────────── -->
+    <section>
+        <h2 data-i18n="s2-title">데이터 수집 아키텍처</h2>
+        <p data-i18n="s2-p">설정 파일 변경 이력은 Python 에이전트가 직접 Elasticsearch(localhost:9200)에 인덱싱하며, 일 단위로 로테이션되는 <code>config_history-YYYY-MM-DD</code> 인덱스에 저장됩니다. 생산라인 로그(PS Server, PDI Adapter, Illumination)는 Filebeat → Logstash(172.17.1.39:5044) 파이프라인을 통해 수집되며, WARN/ERROR/FATAL 수준의 로그만 필터링하여 신호 대 잡음비를 최적화합니다.</p>
+
+        <div class="box">
+            <h4 data-i18n="s2-box-title">파이프라인 구성</h4>
+            <p data-i18n="s2-box-p">Filebeat 에이전트가 생산라인 서버에서 로그를 수집하여 Logstash 중앙 서버로 전달하고, Logstash에서 필터링 및 파싱을 거쳐 Elasticsearch에 저장됩니다.</p>
+        </div>
+    </section>
+
+    <section>
+        <h2 data-i18n="s3-title">설정 형상 관리 및 변경 추적</h2>
+        <p data-i18n="s3-p">Watchdog 서비스는 파일 생성, 수정, 삭제, 이동 4가지 이벤트를 처리하며, 파일 수정 타임스탬프 기반 중복 제거 로직으로 불필요한 비교 연산을 방지합니다. 변경 감지 시 Beyond Compare 2가 라인 단위 diff를 생성하고, 결과는 참조 파일 저장소(로컬 아카이브 저장소)에 타임스탬프와 함께 보관되어 전체 변경 이력을 추적 가능하게 합니다.</p>
+    </section>
+
+    <section>
+        <h2 data-i18n="s4-title">키바나 대시보드 및 시각화</h2>
+        <p data-i18n="s4-p">Elasticsearch에 저장된 설정 변경 이력과 필터링된 로그 데이터는 Kibana를 통해 통합 대시보드로 시각화됩니다. 생산라인별(linename), 로그 발생원(log_originator), 이벤트 유형별 필터링이 가능하며, 설정 변경 패턴 분석과 장애 원인 추적에 활용됩니다.</p>
+    </section>
+
+    <section>
+        <h2 data-i18n="s5-title">엔지니어링 결정 및 트레이드오프</h2>
+        <div class="tw">
+            <table>
+                <thead>
+                    <tr>
+                        <th data-i18n="s5-th1">결정 사항</th>
+                        <th data-i18n="s5-th2">선택 이유</th>
+                        <th data-i18n="s5-th3">트레이드오프</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Python Watchdog → Elasticsearch 직접 인덱싱</td>
+                        <td>설정 변경은 저빈도·고가치 이벤트로 즉시 인덱싱 필요</td>
+                        <td>Logstash의 재시도 큐 및 영속성 기능 미사용</td>
+                    </tr>
+                    <tr>
+                        <td>Beyond Compare 2 외부 비교 엔진 사용</td>
+                        <td>구조화된 출력 형식, 바이너리/텍스트 파일 모두 지원</td>
+                        <td>Windows 전용 의존성, 출력 파싱 로직 취약</td>
+                    </tr>
+                    <tr>
+                        <td>메모리 기반 이벤트 중복 제거</td>
+                        <td>단일 파일 저장 시 중복 이벤트 방지</td>
+                        <td>서비스 재시작 시 상태 소실, 재시작 직후 이벤트 누락 가능</td>
+                    </tr>
+                    <tr>
+                        <td>절대 경로 하드코딩</td>
+                        <td>산업용 제어 시스템은 Windows 기반, 크로스 플랫폼 불필요</td>
+                        <td>배포 시 정확한 디렉토리 구조 요구, 이식성 제로</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+<section>
+    <h2 data-i18n="img-title">시스템 아키텍처</h2>
+    <div class="shots">
+        <div class="shot">
+            <img src="images/arch-elk.svg" alt="VisualAI ELK Architecture">
+            <p class="cap" data-i18n="img-cap-elk">ELK Stack 구성 — Elasticsearch · Logstash · Kibana (원본 배포)</p>
+        </div>
+        <div class="shot">
+            <img src="images/arch-opensearch.svg" alt="VisualAI OpenSearch Architecture">
+            <p class="cap" data-i18n="img-cap-os">OpenSearch 마이그레이션 구성 — Data Prepper · ML Commons · 시맨틱 검색</p>
+        </div>
+    </div>
+</section>
+
+<section>
+    <h2 data-i18n="s5-title">OpenSearch 마이그레이션</h2>
+    <p data-i18n="s5-p">본 시스템은 ELK Stack(Elasticsearch · Logstash · Kibana)으로 구축되었으나, 동일한 아키텍처를 OpenSearch 기반으로 마이그레이션할 수 있습니다. Logstash는 Data Prepper로, Kibana는 OpenSearch Dashboards로 대체되며, ML Commons 플러그인을 통해 이상 탐지 및 시맨틱 검색 기능을 추가로 활용할 수 있습니다. OpenSearch는 완전한 오픈소스로 라이선스 비용 없이 동일한 기능을 제공합니다.</p>
+</section>
+
+</main>
+
+<footer>
+    <p><a href="../../index.html" data-i18n="footer-back">← 포트폴리오로 돌아가기</a></p>
+    <p style="margin-top:8px;" data-i18n="footer-credit">산업 자동화 환경을 위한 맞춤형 설정 형상 관리 및 로그 인텔리전스 시스템</p>
+</footer>
+
+<!-- ── i18n ── -->
+<script>
+const i18n = {
+    ko: {
+        'nav-home': '홈',
+        'nav-projects': '프로젝트',
+        'hero-eyebrow': '산업 자동화 · 설정 형상 관리',
+        'hero-sub': '철강/코일 가공 생산라인의 제어 시스템 설정 변경을 실시간으로 감지하고, ELK 스택 기반 중앙 로그 집계 및 분석을 수행하는 산업용 모니터링 시스템',
+        's1-title': '시스템 개요',
+        's1-p': 'VisualAI는 산업 생산라인의 제어 시스템 파라미터 파일(<code>*.pfa</code>) 변경을 실시간 감지합니다. Python Watchdog 서비스가 <code>설정 파일 감시 디렉토리를 모니터링하며, 설정 변경 발생 시 Beyond Compare 2를 통해 바이너리 비교를 수행하고 변경 이력을 Elasticsearch에 기록합니다.',
+        's2-title': '데이터 수집 아키텍처',
+        's2-p': '설정 파일 변경 이력은 Python 에이전트가 직접 Elasticsearch(localhost:9200)에 인덱싱하며, 일 단위로 로테이션되는 <code>config_history-YYYY-MM-DD</code> 인덱스에 저장됩니다. 생산라인 로그(PS Server, PDI Adapter, Illumination)는 Filebeat → Logstash(172.17.1.39:5044) 파이프라인을 통해 수집되며, WARN/ERROR/FATAL 수준의 로그만 필터링하여 신호 대 잡음비를 최적화합니다.',
+        's2-box-title': '파이프라인 구성',
+        's2-box-p': 'Filebeat 에이전트가 생산라인 서버에서 로그를 수집하여 Logstash 중앙 서버로 전달하고, Logstash에서 필터링 및 파싱을 거쳐 Elasticsearch에 저장됩니다.',
+        's3-title': '설정 형상 관리 및 변경 추적',
+        's3-p': 'Watchdog 서비스는 파일 생성, 수정, 삭제, 이동 4가지 이벤트를 처리하며, 파일 수정 타임스탬프 기반 중복 제거 로직으로 불필요한 비교 연산을 방지합니다. 변경 감지 시 Beyond Compare 2가 라인 단위 diff를 생성하고, 결과는 참조 파일 저장소(<code>로컬 아카이브 저장소)에 타임스탬프와 함께 보관되어 전체 변경 이력을 추적 가능하게 합니다.',
+        's4-title': '키바나 대시보드 및 시각화',
+        's4-p': 'Elasticsearch에 저장된 설정 변경 이력과 필터링된 로그 데이터는 Kibana를 통해 통합 대시보드로 시각화됩니다. 생산라인별(linename), 로그 발생원(log_originator), 이벤트 유형별 필터링이 가능하며, 설정 변경 패턴 분석과 장애 원인 추적에 활용됩니다.',
+        's5-title': '엔지니어링 결정 및 트레이드오프',
+        's5-th1': '결정 사항',
+        's5-th2': '선택 이유',
+        's5-th3': '트레이드오프',
+        'img-title': '시스템 아키텍처',
+        'img-cap-elk': 'ELK Stack 구성 — Elasticsearch · Logstash · Kibana (원본 배포)',
+        'img-cap-os': 'OpenSearch 마이그레이션 구성 — Data Prepper · ML Commons · 시맨틱 검색',
+        's5-title': 'OpenSearch 마이그레이션',
+        's5-p': '본 시스템은 ELK Stack으로 구축되었으나 OpenSearch 기반으로 마이그레이션할 수 있습니다. Logstash는 Data Prepper로, Kibana는 OpenSearch Dashboards로 대체되며, ML Commons를 통해 이상 탐지 및 시맨틱 검색을 추가 활용할 수 있습니다.',
+        'footer-back': '← 포트폴리오로 돌아가기',
+        'footer-credit': '산업 자동화 환경을 위한 맞춤형 설정 형상 관리 및 로그 인텔리전스 시스템',
+    },
+    en: {
+        'nav-home': 'Home',
+        'nav-projects': 'Projects',
+        'hero-eyebrow': 'Industrial Automation · Configuration Management',
+        'hero-sub': 'Real-time configuration drift detection and centralized log aggregation system for steel/coil processing production lines, built on ELK stack with custom Python watchdog service',
+        's1-title': 'System Overview',
+        's1-p': 'VisualAI monitors real-time changes to industrial control system parameter files (<code>*.pfa</code>) on industrial production lines. A Python Watchdog service watches the designated config directory, triggers binary comparison via Beyond Compare 2 on each modification, and indexes all configuration drift history into Elasticsearch.',
+        's2-title': 'Data Collection Architecture',
+        's2-p': 'Configuration change events are indexed directly to local Elasticsearch (port 9200) by the Python agent, stored in daily-rotated <code>config_history-YYYY-MM-DD</code> indices. Production line logs (PS Server, PDI Adapter, Illumination) flow through a Filebeat → Logstash pipeline (172.17.1.39:5044), with intelligent filtering retaining only WARN/ERROR/FATAL severity to optimize signal-to-noise ratio.',
+        's2-box-title': 'Pipeline Configuration',
+        's2-box-p': 'Filebeat agents collect logs from production line servers and forward them to the central Logstash server, where filtering and parsing occur before storage in Elasticsearch.',
+        's3-title': 'Configuration Drift Detection & Versioning',
+        's3-p': 'The Watchdog service handles four event types (create, modify, delete, move) with timestamp-based deduplication to prevent redundant comparisons. On each detected change, Beyond Compare 2 generates line-level diffs, and results are archived with timestamps in the reference file repository (<code>로컬 아카이브 저장소), enabling full historical traceability.',
+        's4-title': 'Kibana Dashboards & Visualization',
+        's4-p': 'Configuration change history and filtered log data stored in Elasticsearch are visualized through integrated Kibana dashboards. Filtering by production line (linename), log originator, and event type enables pattern analysis of configuration changes and root cause investigation for production incidents.',
+        's5-title': 'Engineering Decisions & Trade-offs',
+        's5-th1': 'Decision',
+        's5-th2': 'Rationale',
+        's5-th3': 'Trade-off',
+        'img-title': 'System Architecture',
+        'img-cap-elk': 'ELK Stack — Elasticsearch · Logstash · Kibana (original deployment)',
+        'img-cap-os': 'OpenSearch migration — Data Prepper · ML Commons · semantic search',
+        's5-title': 'OpenSearch Migration',
+        's5-p': 'The system was built on ELK Stack (Elasticsearch · Logstash · Kibana) and can be migrated to OpenSearch. Logstash is replaced by Data Prepper, Kibana by OpenSearch Dashboards, with ML Commons adding anomaly detection and semantic search at no additional license cost.',
+        'footer-back': '← Back to Portfolio',
+        'footer-credit': 'Custom configuration management and log intelligence system for industrial automation environments',
+    }
+};
+
+function setLang(lang) {
+    document.documentElement.lang = lang;
+    document.getElementById('btn-ko').classList.toggle('active', lang === 'ko');
+    document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+    localStorage.setItem('lang', lang);
+
+    const dict = i18n[lang];
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) el.innerHTML = dict[key];
+    });
+}
+
+// Auto-detect from main page's localStorage setting, default Korean
+const saved = localStorage.getItem('lang') || 'ko';
+setLang(saved);
+</script>
+
+</body>
+</html>

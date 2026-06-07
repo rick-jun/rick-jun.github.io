@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AICraft – Multi-Database Infrastructure Library | Rick</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #0f1117; --surface: #1a1d24; --border: #2a2e3a;
+            --text: #c8ccd4; --text-dim: #6b7280; --accent: #e8913a;
+            --accent-dim: #b8722e; --green: #4ec973; --red: #e0555a; --blue: #5b9bd5;
+            --font-mono: 'SF Mono','Cascadia Code','Consolas',monospace;
+            --font-sans: 'Segoe UI','Inter',system-ui,-apple-system,sans-serif;
+            --max-w: 860px;
+        }
+
+        body {
+            background: var(--bg); color: var(--text);
+            font-family: var(--font-sans); line-height: 1.65;
+        }
+
+        nav {
+            background: rgba(15,17,23,0.9); backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border); padding: 0 20px;
+            position: sticky; top: 0; z-index: 10;
+        }
+        nav .inner {
+            max-width: var(--max-w); margin: 0 auto;
+            display: flex; align-items: center; gap: 20px; height: 48px;
+        }
+        nav a { color: var(--text-dim); text-decoration: none; font-size: 0.85rem; }
+        nav a:hover { color: var(--text); }
+        nav .brand { color: var(--accent); font-weight: 700; margin-right: auto; }
+        nav .spacer { flex: 1; }
+
+        .lang-toggle { display: flex; gap: 2px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 2px; }
+        .lang-toggle button { background: none; border: none; color: #6b7280; font-family: var(--font-mono); font-size: 10px; padding: 3px 10px; border-radius: 13px; cursor: pointer; letter-spacing: 0.04em; transition: all 0.2s; }
+        .lang-toggle button.active { background: rgba(232,145,58,0.2); color: #e8913a; font-weight: 700; }
+        .lang-toggle button:hover { color: #fff; }
+
+        .hero {
+            max-width: var(--max-w); margin: 0 auto; padding: 56px 20px 40px;
+            border-bottom: 1px solid var(--border); margin-bottom: 40px;
+        }
+        .hero .eyebrow {
+            color: var(--accent); font-family: var(--font-mono);
+            font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 6px;
+        }
+        .hero h1 { font-size: 2.4rem; color: #fff; margin-bottom: 12px; }
+        .hero .subtitle { color: var(--text-dim); font-size: 1rem; max-width: 620px; margin-bottom: 18px; }
+        .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .tag {
+            background: var(--surface); border: 1px solid var(--border);
+            padding: 3px 10px; border-radius: 3px;
+            font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim);
+        }
+        .tag.hl { border-color: var(--accent-dim); color: var(--accent); }
+
+        .container { max-width: var(--max-w); margin: 0 auto; padding: 0 20px; }
+        section { margin-bottom: 44px; }
+        section h2 {
+            font-size: 1.2rem; color: #fff; margin-bottom: 14px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        section h2::before {
+            content: ''; width: 18px; height: 2px; background: var(--accent); display: block;
+        }
+        section p { color: var(--text-dim); margin-bottom: 12px; font-size: 0.9rem; }
+        section strong { color: var(--text); }
+
+        .box {
+            background: var(--surface); border-left: 3px solid var(--accent);
+            padding: 14px 18px; border-radius: 0 5px 5px 0; margin: 16px 0;
+        }
+        .box h4 { color: #fff; font-size: 0.88rem; margin-bottom: 4px; }
+        .box p { font-size: 0.82rem; margin: 0; }
+
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        @media (max-width: 560px) { .two-col { grid-template-columns: 1fr; } }
+
+        .code {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 5px;
+            padding: 14px 18px; margin: 12px 0; overflow-x: auto;
+        }
+        .code pre { font-family: var(--font-mono); font-size: 0.73rem; line-height: 1.6; color: var(--text); }
+
+        .tw { overflow-x: auto; margin: 12px 0; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+        th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+        th { font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); background: var(--surface); }
+        td { color: var(--text); }
+        td code { background: rgba(255,255,255,0.04); padding: 2px 5px; border-radius: 2px; font-family: var(--font-mono); font-size: 0.76rem; }
+
+        .shots { display: flex; flex-direction: column; gap: 14px; margin: 16px 0; }
+        .shot {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 6px; padding: 10px; overflow: hidden;
+        }
+        .shot img { width: 100%; height: auto; display: block; border-radius: 3px; }
+        .shot .cap {
+            font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-dim);
+            margin-top: 8px; padding: 0 4px;
+        }
+
+        footer {
+            border-top: 1px solid var(--border); text-align: center; padding: 28px 20px;
+            color: var(--text-dim); font-size: 0.8rem;
+        }
+        footer a { color: var(--accent); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="inner">
+        <a href="../../index.html" class="brand">Rick</a>
+        <a href="../../index.html" data-i18n="nav-home">홈</a>
+        <a href="../../index.html#projects" data-i18n="nav-projects">프로젝트</a>
+        <span class="spacer"></span>
+        <div class="lang-toggle">
+            <button id="btn-ko" class="active" onclick="setLang('ko')">한글</button>
+            <button id="btn-en" onclick="setLang('en')">ENG</button>
+        </div>
+    </div>
+</nav>
+
+<header class="hero">
+    <p class="eyebrow" data-i18n="hero-eyebrow">인프라 라이브러리 · .NET Framework 4.8</p>
+    <h1>AICraft – Multi-Database Infrastructure Library</h1>
+    <p class="subtitle" data-i18n="hero-sub">MS SQL Server, PostgreSQL, Access 등 다중 데이터베이스 연결과 로그 관리, UI 유틸리티를 제공하는 .NET Framework 기반 클래스 라이브러리.</p>
+    <div class="tags">
+        <span class="tag hl">C#</span><span class="tag hl">.NET Framework 4.8</span><span class="tag">MS SQL Server</span><span class="tag">PostgreSQL</span><span class="tag">Microsoft Access</span><span class="tag">WPF</span><span class="tag">WinForms</span><span class="tag">ADO.NET</span>
+    </div>
+</header>
+
+<main class="container">
+
+    <section>
+        <h2 data-i18n="s1-title">프로젝트 개요</h2>
+        <p data-i18n="s1-p">AICraft는 산업 자동화 및 비전 검사 시스템의 기반이 되는 재사용 가능한 인프라 컴포넌트를 제공하는 DLL 라이브러리입니다. 다중 데이터베이스 핸들러, 로그 관리, UI 유틸리티, XML 설정 처리를 포함하며, WinForms 및 WPF 애플리케이션에서 참조하여 사용할 수 있습니다.</p>
+    </section>
+
+    <section>
+        <h2 data-i18n="s2-title">아키텍처 개요</h2>
+        <p data-i18n="s2-p">라이브러리는 DB 레이어, Common 레이어, UI 레이어의 세 가지 계층으로 구성됩니다. DB 레이어는 MS SQL Server, PostgreSQL, Access 각각에 대한 전용 ADO.NET 핸들러를 제공합니다. Common 레이어는 로그 기록, 파일 로테이션, XML 직렬화/역직렬화를 담당하며, UI 레이어는 자동 종료 메시지 박스(WinForms)와 자동 스크롤 텍스트 박스(WPF)를 포함합니다.</p>
+
+        <div class="box">
+            <h4 data-i18n="s2-box-title">핵심 성과</h4>
+            <p data-i18n="s2-box-p">MS SQL Server, PostgreSQL, Access를 위한 별도 ADO.NET 핸들러 구현 / 24/7 산업 환경을 위한 파일 로테이션 기반 로그 관리 시스템 구축 / WinForms 및 WPF 모두에서 사용 가능한 비차단 UI 컴포넌트 개발 / 운영자 편의를 위한 XML 기반 설정 파일 처리 / 논리적 계층 구조(DB, Common, UI)를 갖춘 클린 아키텍처</p>
+        </div>
+    </section>
+
+    <section>
+        <h2 data-i18n="s3-title">주요 엔지니어링 결정</h2>
+        <p data-i18n="s3-p">다중 데이터베이스 지원을 위해 별도의 핸들러를 구현하여 ORM 없이도 다양한 환경에 대응할 수 있도록 했습니다. .NET Framework 4.8을 타겟으로 한 것은 기존 산업용 SCADA 시스템 및 레거시 WinForms 애플리케이션과의 호환성을 고려한 결정입니다. WPF와 WinForms를 동시에 지원하는 UI 컴포넌트는 점진적인 UI 마이그레이션 시나리오를 염두에 두고 설계되었습니다.</p>
+    </section>
+
+    <section>
+        <h2 data-i18n="s4-title">복잡도 평가</h2>
+        <p data-i18n="s4-p">프로젝트 규모는 약 10개의 소스 파일로 구성된 소규모 클래스 라이브러리입니다. 동기식 ADO.NET 호출을 사용하며, 비동기 패턴은 적용되지 않았습니다. FileRotator를 통한 로그 로테이션은 기본적인 신뢰성 메커니즘을 제공하지만, 재시도 로직이나 서킷 브레이커는 구현되지 않았습니다. 매개변수화된 쿼리는 각 핸들러에서 사용될 것으로 예상되나, 소스 코드에서 명시적으로 확인되지는 않았습니다.</p>
+    </section>
+
+    <section>
+        <h2 data-i18n="s5-title">포트폴리오 하이라이트</h2>
+        <div class="box">
+            <h4 data-i18n="s5-box-title">핵심 성과</h4>
+            <p data-i18n="s5-box-p">MS SQL Server, PostgreSQL, Access를 위한 별도 ADO.NET 핸들러 구현 / 24/7 산업 환경을 위한 파일 로테이션 기반 로그 관리 시스템 구축 / WinForms 및 WPF 모두에서 사용 가능한 비차단 UI 컴포넌트 개발 / XML 기반 설정 파일 처리 / 논리적 계층 구조(DB, Common, UI)를 갖춘 클린 아키텍처</p>
+        </div>
+    </section>
+
+    <section>
+        <h2 data-i18n="s6-title">시스템 아키텍처 다이어그램</h2>
+        <div class="shots">
+            <div class="shot">
+                <svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg" style="width:100%; background:#0d1117;">
+                    <rect x="0" y="0" width="800" height="400" fill="#0d1117"/>
+                    <text x="400" y="30" text-anchor="middle" fill="#e0e0e0" font-family="monospace" font-size="14">AICraft - 3-Layer Architecture</text>
+                    <rect x="50" y="60" width="700" height="80" rx="6" fill="#1a1d24" stroke="#4fc3f7" stroke-width="1.5"/>
+                    <text x="400" y="90" text-anchor="middle" fill="#4fc3f7" font-family="monospace" font-size="12" font-weight="bold">DB Layer</text>
+                    <rect x="80" y="105" width="150" height="25" rx="3" fill="#2a2e3a" stroke="#4fc3f7" stroke-width="0.8"/>
+                    <text x="155" y="121" text-anchor="middle" fill="#e0e0e0" font-family="monospace" font-size="9">MSSQL Handler</text>
+                    <rect x="260" y="105" width="150" height="25" rx="3" fill="#2a2e3a" stroke="#4fc3f7" stroke-width="0.8"/>
+                    <text x="335" y="121" text-anchor="middle" fill="#e0e0e0" font-family="monospace" font-size="9">PostgreSQL Handler</text>
+                    <rect x="440" y="105" width="150" height="25" rx="3" fill="#2a2e3a" stroke="#4fc3f7" stroke-width="0.8"/>
+                    <text x="515" y="121" text-anchor="middle" fill="#e0e0e0" font-family="monospace" font-size="9">Access Handler</text>
+                    <rect x="620" y="105" width="100" height="25" rx="3" fill="#2a2e3a" stroke="#4fc3f7" stroke-width="0.8"/>
+                    <text x="670" y="121" text-anchor="middle" fill="#e0e0e0" font-family="monospace" font-size="9">Factory</text>
+                    <line x1="400" y1="140" x2="400" y2="170" stroke="#4fc3f7" stroke-width="1.5"/>
+                    <rect x="50" y="170" width="700" height="80" rx="6" fill="#1a1d24" stroke="#4fc3f7" stroke-width="1.5"/>
+                    <text x="400" y="200" text-anchor="middle" fill="#4fc3f7" font-family="monospace" font-size="12" font-weight="bold">Common Layer</text>
+                    <rect x="80" y="215" width="200" height="25" rx="3" fill="#2a2e3a" stroke="#4fc3f7" stroke-width="0.8"/>
+                    <text x="180" y="231" text-anchor="middle" fill="#e0e0e0" font-family="monospace" font-size="9">Logger + FileRotator</text>
+                    <rect x="310" y="215" width="200" height="25" rx="3" fill="#2a2e3a" stroke="#4fc3f7" stroke-width="0.8"/>
+                    <text x="410" y="231" text-anchor="middle" fill="#e0e0e0" font-family="monospace" font-size="9">XmlSerializer</text>
+                    <rect x="540" y="215" width="180" height="25" rx="3" fill="#2a2e3a" stroke="#4fc3f7" stroke-width="0.8"/>
+                    <text x="630" y="231" text-anchor="middle" fill="#e0e0e0" font-family="monospace" font-size="9">Config Manager</text>
+                    <line x1="400" y1="250" x2="400" y2="280" stroke="#4fc3f7" stroke-width="1.5"/>
+                    <rect x="50" y="280" width="700" height="80" rx="6" fill="#1a1d24" stroke="#4fc3f7" stroke-width="1.5"/>
+                    <text x="400" y="310" text-anchor="middle" fill="#4fc3f7" font-family="monospace" font-size="12" font-weight="bold">UI Layer</text>
+                    <rect x="80" y="325" width="200" height="25" rx="3" fill="#2a2e3a" stroke="#4fc3f7" stroke-width="0.8"/>
+                    <text x="180" y="341" text-anchor="middle" fill="#e0e0e0" font-family="monospace" font-size="9">AutoCloseMsgBox (WinForms)</text>
+                    <rect x="310" y="325" width="200" height="25" rx="3" fill="#2a2e3a" stroke="#4fc3f7" stroke-width="0.8"/>
+                    <text x="410" y="341" text-anchor="middle" fill="#e0e0e0" font-family="monospace" font-size="9">AutoScrollTextBox (WPF)</text>
+                    <rect x="540" y="325" width="180" height="25" rx="3" fill="#2a2e3a" stroke="#4fc3f7" stroke-width="0.8"/>
+                    <text x="630" y="341" text-anchor="middle" fill="#e0e0e0" font-family="monospace" font-size="9">StatusBar Helper</text>
+                    <text x="400" y="385" text-anchor="middle" fill="#6b7280" font-family="monospace" font-size="10">Target: .NET Framework 4.8 | WinForms + WPF</text>
+                </svg>
+                <div class="cap">AICraft 3계층 아키텍처 다이어그램</div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    <p><a href="../../index.html" data-i18n="footer-back">← 포트폴리오로 돌아가기</a></p>
+    <p style="margin-top:8px;" data-i18n="footer-credit">산업 자동화 시스템을 위한 기반 라이브러리 설계 및 구현.</p>
+</footer>
+
+<script>
+const i18n = {
+    ko: {
+        'nav-home': '홈',
+        'nav-projects': '프로젝트',
+        'hero-eyebrow': '인프라 라이브러리 · .NET Framework 4.8',
+        'hero-sub': 'MS SQL Server, PostgreSQL, Access 등 다중 데이터베이스 연결과 로그 관리, UI 유틸리티를 제공하는 .NET Framework 기반 클래스 라이브러리.',
+        's1-title': '프로젝트 개요',
+        's1-p': 'AICraft는 산업 자동화 및 비전 검사 시스템의 기반이 되는 재사용 가능한 인프라 컴포넌트를 제공하는 DLL 라이브러리입니다. 다중 데이터베이스 핸들러, 로그 관리, UI 유틸리티, XML 설정 처리를 포함하며, WinForms 및 WPF 애플리케이션에서 참조하여 사용할 수 있습니다.',
+        's2-title': '아키텍처 개요',
+        's2-p': '라이브러리는 DB 레이어, Common 레이어, UI 레이어의 세 가지 계층으로 구성됩니다. DB 레이어는 MS SQL Server, PostgreSQL, Access 각각에 대한 전용 ADO.NET 핸들러를 제공합니다. Common 레이어는 로그 기록, 파일 로테이션, XML 직렬화/역직렬화를 담당하며, UI 레이어는 자동 종료 메시지 박스(WinForms)와 자동 스크롤 텍스트 박스(WPF)를 포함합니다.',
+        's2-box-title': '핵심 성과',
+        's2-box-p': 'MS SQL Server, PostgreSQL, Access를 위한 별도 ADO.NET 핸들러 구현 / 24/7 산업 환경을 위한 파일 로테이션 기반 로그 관리 시스템 구축 / WinForms 및 WPF 모두에서 사용 가능한 비차단 UI 컴포넌트 개발 / 운영자 편의를 위한 XML 기반 설정 파일 처리 / 논리적 계층 구조(DB, Common, UI)를 갖춘 클린 아키텍처',
+        's3-title': '주요 엔지니어링 결정',
+        's3-p': '다중 데이터베이스 지원을 위해 별도의 핸들러를 구현하여 ORM 없이도 다양한 환경에 대응할 수 있도록 했습니다. .NET Framework 4.8을 타겟으로 한 것은 기존 산업용 SCADA 시스템 및 레거시 WinForms 애플리케이션과의 호환성을 고려한 결정입니다. WPF와 WinForms를 동시에 지원하는 UI 컴포넌트는 점진적인 UI 마이그레이션 시나리오를 염두에 두고 설계되었습니다.',
+        's4-title': '복잡도 평가',
+        's4-p': '프로젝트 규모는 약 10개의 소스 파일로 구성된 소규모 클래스 라이브러리입니다. 동기식 ADO.NET 호출을 사용하며, 비동기 패턴은 적용되지 않았습니다. FileRotator를 통한 로그 로테이션은 기본적인 신뢰성 메커니즘을 제공하지만, 재시도 로직이나 서킷 브레이커는 구현되지 않았습니다. 매개변수화된 쿼리는 각 핸들러에서 사용될 것으로 예상되나, 소스 코드에서 명시적으로 확인되지는 않았습니다.',
+        's5-title': '포트폴리오 하이라이트',
+        's5-box-title': '핵심 성과',
+        's5-box-p': 'MS SQL Server, PostgreSQL, Access를 위한 별도 ADO.NET 핸들러 구현 / 24/7 산업 환경을 위한 파일 로테이션 기반 로그 관리 시스템 구축 / WinForms 및 WPF 모두에서 사용 가능한 비차단 UI 컴포넌트 개발 / XML 기반 설정 파일 처리 / 논리적 계층 구조(DB, Common, UI)를 갖춘 클린 아키텍처',
+        's6-title': '시스템 아키텍처 다이어그램',
+        'footer-back': '← 포트폴리오로 돌아가기',
+        'footer-credit': '산업 자동화 시스템을 위한 기반 라이브러리 설계 및 구현.',
+    },
+    en: {
+        'nav-home': 'Home',
+        'nav-projects': 'Projects',
+        'hero-eyebrow': 'Infrastructure Library · .NET Framework 4.8',
+        'hero-sub': 'A .NET Framework class library providing multi-database connectivity (MS SQL Server, PostgreSQL, Access), log management, and UI utilities for industrial applications.',
+        's1-title': 'Project Overview',
+        's1-p': 'AICraft is a reusable DLL library providing foundational infrastructure components for industrial automation and vision inspection systems. It includes multi-database handlers, log management, UI utilities, and XML configuration processing, designed to be referenced by both WinForms and WPF applications.',
+        's2-title': 'Architecture Overview',
+        's2-p': 'The library is structured into three layers: DB Layer, Common Layer, and UI Layer. The DB Layer provides dedicated ADO.NET handlers for MS SQL Server, PostgreSQL, and Access. The Common Layer handles logging, file rotation, and XML serialization/deserialization. The UI Layer includes an auto-closing message box (WinForms) and an auto-scrolling text box (WPF).',
+        's2-box-title': 'Key Achievements',
+        's2-box-p': 'Implemented dedicated ADO.NET handlers for MS SQL Server, PostgreSQL, and Access / Built a file rotation-based log management system for 24/7 industrial environments / Developed non-blocking UI components usable in both WinForms and WPF / Designed XML-based configuration file processing for operator convenience / Clean architecture with logical layering (DB, Common, UI)',
+        's3-title': 'Key Engineering Decisions',
+        's3-p': 'Separate handlers were implemented for multi-database support, enabling the library to operate in heterogeneous environments without an ORM. Targeting .NET Framework 4.8 was a deliberate choice for compatibility with existing industrial SCADA systems and legacy WinForms applications. The dual UI framework support (WPF + WinForms) was designed for gradual UI migration scenarios.',
+        's4-title': 'Complexity Assessment',
+        's4-p': 'The project is a small class library with approximately 10 source files. It uses synchronous ADO.NET calls without async/await patterns. The FileRotator provides basic reliability through log rotation, but retry logic and circuit breakers are not implemented. Parameterized queries are expected in each handler but are not explicitly verified in the source code.',
+        's5-title': 'Portfolio Highlights',
+        's5-box-title': 'Key Achievements',
+        's5-box-p': 'Implemented dedicated ADO.NET handlers for MS SQL Server, PostgreSQL, and Access / Built a file rotation-based log management system for 24/7 industrial environments / Developed non-blocking UI components usable in both WinForms and WPF / Designed XML-based configuration file processing / Clean architecture with logical layering (DB, Common, UI)',
+        's6-title': 'System Architecture Diagram',
+        'footer-back': '← Back to Portfolio',
+        'footer-credit': 'Foundation library design and implementation for industrial automation systems.',
+    }
+};
+
+function setLang(lang) {
+    document.documentElement.lang = lang;
+    document.getElementById('btn-ko').classList.toggle('active', lang === 'ko');
+    document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+    localStorage.setItem('lang', lang);
+
+    const dict = i18n[lang];
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) el.innerHTML = dict[key];
+    });
+}
+
+const saved = localStorage.getItem('lang') || 'ko';
+setLang(saved);
+</script>
+
+</body>
+</html>

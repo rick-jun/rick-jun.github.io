@@ -1,0 +1,19 @@
+﻿[
+    {
+        "session_id":  "403858cd-6110-41a2-9139-98d88bf4da9f",
+        "timestamp":  "2026-05-06T22:58:59",
+        "agent":  "Solo-agent",
+        "cwd":  "G:\\AgentAI\\MyWebPage\\src",
+        "total_cost_usd":  2.2569,
+        "models":  [
+                       {
+                           "model":  "claude-opus-4-7",
+                           "input":  74,
+                           "output":  29795,
+                           "cache_read":  2135828,
+                           "cache_write":  70991,
+                           "cost_usd":  2.2569
+                       }
+                   ]
+    }
+]
